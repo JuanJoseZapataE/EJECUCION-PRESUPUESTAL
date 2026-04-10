@@ -72,7 +72,7 @@ class Eje(Base):
     __tablename__ = "eje"
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    dependecia_de_afectacion_de_gastos = Column(String(50))
+    dependecia_de_afectacion_de_gastos = Column(String(255))
     tipo = Column(String(5))
     cta = Column(String(10))
     subc = Column(String(10))

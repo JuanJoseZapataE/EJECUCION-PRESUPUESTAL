@@ -3,6 +3,7 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 import pandas as pd
 from io import BytesIO
+import unicodedata
 
 from app.database import get_db
 from app.models import Eje
@@ -26,7 +27,20 @@ async def upload_eje(file: UploadFile = File(...), db: Session = Depends(get_db)
     df = pd.read_excel(BytesIO(contents), header=None)
 
     def _normalize(value) -> str:
-        return str(value).replace("\xa0", " ").strip().lower() if not pd.isna(value) else ""
+        if pd.isna(value):
+            return ""
+        # Texto base
+        s = str(value).replace("\xa0", " ").replace("\n", " ").replace("\r", " ")
+        s = s.strip().lower()
+        # Quitar tildes/acentos
+        s = "".join(
+            c
+            for c in unicodedata.normalize("NFD", s)
+            if unicodedata.category(c) != "Mn"
+        )
+        # Colapsar espacios múltiples
+        s = " ".join(s.split())
+        return s
 
     # Mapeo de nombres de columna (normalizados) a campos del modelo
     header_name_map = {
@@ -61,6 +75,22 @@ async def upload_eje(file: UploadFile = File(...), db: Session = Depends(get_db)
     def _nan_to_none(v):
         return None if pd.isna(v) else v
 
+    # Convertir números en formato local (ej. "20.280.000,00") a float/decimal
+    def _parse_number(v):
+        if pd.isna(v):
+            return None
+        if isinstance(v, (int, float)):
+            return v
+        s = str(v).replace("\xa0", " ").strip()
+        if not s:
+            return None
+        # Quitar separadores de miles "." y usar "," como separador decimal
+        s = s.replace(".", "").replace(",", ".")
+        try:
+            return float(s)
+        except ValueError:
+            return None
+
     records = []
     current_dep = None  # dependencia_de_afectacion_de_gastos actual
     current_cols = None  # mapeo: campo -> índice de columna
@@ -70,8 +100,15 @@ async def upload_eje(file: UploadFile = File(...), db: Session = Depends(get_db)
 
         # Fila de título de bloque (dependencia de afectación de gastos)
         if norm_row and "dependencia de afectacion de gastos" in norm_row[0]:
-            # Usamos el valor original completo como título
-            current_dep = str(row.iloc[0]).replace("\xa0", " ").strip()
+            # El encabezado está en la columna A, el valor suele estar en la celda de la derecha (o alguna siguiente no vacía)
+            dep_value = None
+            for v in row[1:]:
+                if not (isinstance(v, float) and pd.isna(v)) and str(v).strip() != "":
+                    dep_value = str(v).replace("\xa0", " ").strip()
+                    break
+
+            # Si por alguna razón no encontramos valor a la derecha, usamos el propio texto de la celda A como fallback
+            current_dep = dep_value or str(row.iloc[0]).replace("\xa0", " ").strip()
             current_cols = None
             continue
 
@@ -79,8 +116,17 @@ async def upload_eje(file: UploadFile = File(...), db: Session = Depends(get_db)
         if any(n in header_name_map for n in norm_row):
             col_map = {}
             for col_idx, name in enumerate(norm_row):
+                field = None
+                # Coincidencia directa
                 if name in header_name_map:
                     field = header_name_map[name]
+                else:
+                    # Manejar variantes de "REC" con puntos/espacios ("RE C.", "REC.", etc.)
+                    simple = name.replace(" ", "").replace(".", "")
+                    if simple == "rec":
+                        field = "rec"
+
+                if field:
                     col_map[field] = col_idx
             # Requerimos al menos un subconjunto razonable para considerar que es encabezado
             if {"tipo", "cta", "subc"}.issubset(col_map.keys()):
@@ -98,7 +144,33 @@ async def upload_eje(file: UploadFile = File(...), db: Session = Depends(get_db)
             }
             for field, col_idx in current_cols.items():
                 value = row.iloc[col_idx] if col_idx < len(row) else None
-                data[field] = _nan_to_none(value)
+                # Campos numéricos que pueden venir con formato "20.280.000,00"
+                if field in {
+                    "rec",
+                    "apropiacion_vigente_dep_gsto",
+                    "total_cdp_dep_gstos",
+                    "apropiacion_disponible_dep_gsto",
+                    "total_cdp_modificacion_dep_gstos",
+                    "total_compromiso_dep_gstos",
+                    "cdp_por_comprometer_dep_gstos",
+                    "total_obligaciones_dep_gstos",
+                    "compromiso_por_obligar_dep_gstos",
+                    "total_ordenes_pago_dep_gstos",
+                    "obligaciones_por_ordenar_dep_gstos",
+                    "pagos_dep_gstos",
+                    "ordenes_pago_por_pagar_dep_gstos",
+                    "total_reintegros_dep_gstos",
+                }:
+                    parsed = _parse_number(value)
+                    # Para rec, que es entero, intentamos castear a int si es posible
+                    if field == "rec" and parsed is not None:
+                        try:
+                            parsed = int(parsed)
+                        except (TypeError, ValueError):
+                            parsed = None
+                    data[field] = parsed
+                else:
+                    data[field] = _nan_to_none(value)
 
             records.append(Eje(**data))
 

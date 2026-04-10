@@ -68,7 +68,7 @@ CREATE TABLE crp (
 
 CREATE TABLE eje (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
-    dependecia_de_afectacion_de_gastos VARCHAR(50),
+    dependecia_de_afectacion_de_gastos VARCHAR(255),
     tipo VARCHAR(5),
     cta VARCHAR(10),
     subc VARCHAR(10),
