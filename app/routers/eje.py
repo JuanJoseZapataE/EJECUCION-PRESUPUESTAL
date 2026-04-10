@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 import pandas as pd
 from io import BytesIO
 import unicodedata
+from openpyxl import load_workbook
 
 from app.database import get_db
 from app.models import Eje
@@ -25,6 +26,15 @@ async def upload_eje(file: UploadFile = File(...), db: Session = Depends(get_db)
     contents = await file.read()
     # Leemos sin encabezados porque hay filas iniciales y múltiples bloques
     df = pd.read_excel(BytesIO(contents), header=None)
+
+    # Cargar también con openpyxl para detectar filas en negrita
+    wb = load_workbook(BytesIO(contents), data_only=True)
+    ws = wb.active
+    bold_rows = set()
+    for row in ws.iter_rows():
+        if any(cell.font and cell.font.bold for cell in row):
+            # openpyxl es 1-based, pandas 0-based
+            bold_rows.add(row[0].row - 1)
 
     def _normalize(value) -> str:
         if pd.isna(value):
@@ -141,6 +151,8 @@ async def upload_eje(file: UploadFile = File(...), db: Session = Depends(get_db)
 
             data = {
                 "dependecia_de_afectacion_de_gastos": current_dep,
+                # Marcar si la fila original estaba en negrita en el Excel
+                "es_resumen": idx in bold_rows,
             }
             for field, col_idx in current_cols.items():
                 value = row.iloc[col_idx] if col_idx < len(row) else None

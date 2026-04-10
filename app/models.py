@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, DECIMAL, Text
+from sqlalchemy import Column, Integer, String, DateTime, DECIMAL, Text, Boolean
 
 from .database import Base
 
@@ -86,6 +86,7 @@ class Eje(Base):
     situacion = Column(String(50))
     rec = Column(Integer)
     recurso = Column(String(100))
+    es_resumen = Column(Boolean)
     apropiacion_vigente_dep_gsto = Column(DECIMAL(18, 2))
     total_cdp_dep_gstos = Column(DECIMAL(18, 2))
     apropiacion_disponible_dep_gsto = Column(DECIMAL(18, 2))
