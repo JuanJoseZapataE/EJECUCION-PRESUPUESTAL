@@ -101,6 +101,7 @@
     .data-table-row:nth-child(odd) { background: #ffffff; }
     .data-table-header-eje, .data-table-row-eje { grid-template-columns: 1.25fr 1.15fr 1fr 0.75fr 1fr; }
     .data-table-header-5, .data-table-row-5 { grid-template-columns: 0.7fr 0.8fr 1.7fr 1.1fr 0.7fr; }
+    .data-table-header-cruce, .data-table-row-cruce { grid-template-columns: 1.2fr 1fr 0.9fr 0.9fr 0.9fr 0.75fr 0.75fr 0.95fr; }
 
     .pagination { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-top: 1px solid var(--border); font-size: 0.78rem; background: #ffffff; }
     .pagination-info { color: var(--text-muted); }
@@ -267,6 +268,7 @@
             <button type="button" class="tab-btn active" data-table="eje">EJE</button>
             <button type="button" class="tab-btn" data-table="cdp">Apropiación</button>
             <button type="button" class="tab-btn" data-table="crp">Ejecución</button>
+            <button type="button" class="tab-btn" data-table="cruce">Cruce</button>
           </div>
 
           <div id="table-eje-container">
@@ -332,11 +334,18 @@
                 <div id="cdp-filter-rubro" class="filter-dropdown"></div>
               </div>
               <div class="filter-group">
+                <label class="filter-label" for="cdp-filter-recurso">Recurso</label>
+                <div id="cdp-filter-recurso" class="filter-dropdown"></div>
+              </div>
+              <div class="filter-group">
                 <label class="filter-label" for="cdp-filter-numero">CDP</label>
                 <div id="cdp-filter-numero" class="filter-dropdown"></div>
               </div>
             </div>
             <p class="muted" id="cdp-table-summary">Filtra la tabla de Apropiación y visualiza la sumatoria de valor actual.</p>
+            <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:6px; gap:8px;">
+              <button type="button" class="btn" id="cdp-export-btn">Exportar</button>
+            </div>
             <div class="data-table" id="cdp-table" aria-label="Detalle Apropiación">
               <div class="data-table-header data-table-header-5">
                 <span>Número documento</span>
@@ -373,11 +382,18 @@
                 <div id="crp-filter-rubro" class="filter-dropdown"></div>
               </div>
               <div class="filter-group">
+                <label class="filter-label" for="crp-filter-recurso">Recurso</label>
+                <div id="crp-filter-recurso" class="filter-dropdown"></div>
+              </div>
+              <div class="filter-group">
                 <label class="filter-label" for="crp-filter-cdp">CDP</label>
                 <div id="crp-filter-cdp" class="filter-dropdown"></div>
               </div>
             </div>
             <p class="muted" id="crp-table-summary">Filtra la tabla de Ejecución y visualiza la sumatoria de valor actual.</p>
+            <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:6px; gap:8px;">
+              <button type="button" class="btn" id="crp-export-btn">Exportar</button>
+            </div>
             <div class="data-table" id="crp-table" aria-label="Detalle Ejecución">
               <div class="data-table-header data-table-header-5">
                 <span>Número documento</span>
@@ -393,6 +409,60 @@
                   <button type="button" class="pagination-button" id="crp-page-prev">Anterior</button>
                   <span class="pagination-current" id="crp-page-current"></span>
                   <button type="button" class="pagination-button" id="crp-page-next">Siguiente</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="table-cruce-container" style="display:none;">
+            <p class="muted">Cruce de EJE, Apropiación y Ejecución por dependencia y rubro.</p>
+            <div class="filter-group" style="margin-bottom:10px;">
+              <label class="filter-label" for="cruce-search-input">Buscar en cruce por dependencia, rubro, CDP o CRP</label>
+              <input id="cruce-search-input" type="text" class="filter-text" placeholder="Escribe una palabra clave..." />
+            </div>
+            <div class="filters" style="margin-top:0;">
+              <div class="filter-group">
+                <label class="filter-label" for="cruce-filter-dependencia">Dependencia</label>
+                <div id="cruce-filter-dependencia" class="filter-dropdown"></div>
+              </div>
+              <div class="filter-group">
+                <label class="filter-label" for="cruce-filter-rubro">Rubro</label>
+                <div id="cruce-filter-rubro" class="filter-dropdown"></div>
+              </div>
+              <div class="filter-group">
+                <label class="filter-label" for="cruce-filter-cdp">CDP</label>
+                <div id="cruce-filter-cdp" class="filter-dropdown"></div>
+              </div>
+              <div class="filter-group">
+                <label class="filter-label" for="cruce-filter-crp">CRP</label>
+                <div id="cruce-filter-crp" class="filter-dropdown"></div>
+              </div>
+            </div>
+
+            <p class="muted" id="cruce-table-summary">Cruza apropiación vigente EJE, valor actual Apropiación y valor actual Ejecución.</p>
+
+            <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:6px; gap:8px;">
+              <button type="button" class="btn" id="cruce-export-btn">Exportar</button>
+            </div>
+
+            <div class="data-table" id="cruce-table" aria-label="Cruce EJE Apropiación Ejecución">
+              <div class="data-table-header data-table-header-cruce">
+                <span>Dependencia</span>
+                <span>Rubro</span>
+                <span>Aprop. vigente EJE</span>
+                <span>Valor actual Aprop.</span>
+                <span>Valor actual Ejec.</span>
+                <span>CDP</span>
+                <span>CRP</span>
+                <span>Vínculo CRP→CDP</span>
+              </div>
+              <div id="cruce-table-body"></div>
+              <div class="pagination" id="cruce-pagination">
+                <span class="pagination-info" id="cruce-page-info"></span>
+                <div class="pagination-controls">
+                  <button type="button" class="pagination-button" id="cruce-page-prev">Anterior</button>
+                  <span class="pagination-current" id="cruce-page-current"></span>
+                  <button type="button" class="pagination-button" id="cruce-page-next">Siguiente</button>
                 </div>
               </div>
             </div>
@@ -481,8 +551,11 @@
     let crpDataCache = [];
     let cdpFilteredDataCache = [];
     let crpFilteredDataCache = [];
+    let cruceDataCache = [];
+    let cruceFilteredDataCache = [];
     let cdpCurrentPage = 1;
     let crpCurrentPage = 1;
+    let cruceCurrentPage = 1;
     const DETAIL_PAGE_SIZE = 20;
     let selectedCentroFormacion = 'all';
     let ejeTotalApropiacion = null;
@@ -627,6 +700,7 @@
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         const filteredData = filterBySelectedCentro(Array.isArray(data) ? data : [], 'eje');
+        ejeDataCache = filteredData;
 
         const totalRows = filteredData.length;
         const resumenRows = filteredData.filter(r => r.es_resumen === true || r.es_resumen === 1);
@@ -690,7 +764,9 @@
         renderEjeChart(totals);
 
         setupEjePivot(resumenRows);
+        setupCruceTable();
       } catch (err) {
+        ejeDataCache = [];
         mainMetricEl.textContent = '—';
         const resumenEjeTotalEl = document.getElementById('resumen-eje-total');
         if (resumenEjeTotalEl) {
@@ -769,6 +845,7 @@
         renderTotalsComparisonChart();
         setupCdpFilters();
         setupCrpFilters();
+        setupCruceTable();
       } catch (err) {
         cdpTotalEl.textContent = 'Error';
         crpTotalEl.textContent = 'Error';
@@ -932,34 +1009,10 @@
     function setupCdpFilters() {
       const depContainer = document.getElementById('cdp-filter-dependencia');
       const rubroContainer = document.getElementById('cdp-filter-rubro');
+      const recursoContainer = document.getElementById('cdp-filter-recurso');
       const numeroContainer = document.getElementById('cdp-filter-numero');
       const searchInput = document.getElementById('cdp-search-input');
-      if (!depContainer || !rubroContainer || !numeroContainer || !searchInput) return;
-
-      const deps = Array.from(new Set(
-        cdpDataCache
-          .map(r => {
-            const dep = r.dependencia || '';
-            const depDesc = r.dependencia_descripcion || '';
-            return depDesc ? `${dep} - ${depDesc}` : dep;
-          })
-          .filter(Boolean)
-      )).sort((a, b) => a.localeCompare(b, 'es'));
-
-      const rubros = Array.from(new Set(
-        cdpDataCache.map(r => r.rubro || '').filter(Boolean)
-      )).sort((a, b) => a.localeCompare(b, 'es'));
-
-      const numeros = Array.from(new Set(
-        cdpDataCache
-          .map(r => r.numero_documento)
-          .filter(v => v !== null && v !== undefined && String(v).trim() !== '')
-          .map(v => String(v).trim())
-      )).sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
-
-      buildFilterDropdown(depContainer, 'Todas las dependencias', deps);
-      buildFilterDropdown(rubroContainer, 'Todos los rubros', rubros);
-      buildFilterDropdownWithSearch(numeroContainer, 'Todos los CDP', numeros, 'Buscar CDP...');
+      if (!depContainer || !rubroContainer || !recursoContainer || !numeroContainer || !searchInput) return;
 
       let searchTerm = '';
 
@@ -967,21 +1020,121 @@
         return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(i => i.value);
       }
 
+      function setCheckedValues(container, selectedValues) {
+        const selected = new Set(selectedValues || []);
+        container.querySelectorAll('input[type="checkbox"]').forEach(input => {
+          input.checked = selected.has(input.value);
+        });
+        const panel = container.querySelector('.filter-panel');
+        if (panel) {
+          panel.dispatchEvent(new Event('change'));
+        }
+      }
+
+      function getSelections() {
+        return {
+          deps: getCheckedValues(depContainer),
+          rubros: getCheckedValues(rubroContainer),
+          recursos: getCheckedValues(recursoContainer),
+          numeros: getCheckedValues(numeroContainer),
+        };
+      }
+
+      function getRowValues(row) {
+        const dep = row.dependencia || '';
+        const depDesc = row.dependencia_descripcion || '';
+        return {
+          depFull: depDesc ? `${dep} - ${depDesc}` : dep,
+          rubro: row.rubro || '',
+          recurso: row.recurso || '',
+          numero: row.numero_documento !== null && row.numero_documento !== undefined ? String(row.numero_documento).trim() : '',
+        };
+      }
+
+      function rowMatchesSelections(rowValues, selections, excludeKey = '') {
+        if (excludeKey !== 'dep' && selections.deps.length && !selections.deps.includes(rowValues.depFull)) return false;
+        if (excludeKey !== 'rubro' && selections.rubros.length && !selections.rubros.includes(rowValues.rubro)) return false;
+        if (excludeKey !== 'recurso' && selections.recursos.length && !selections.recursos.includes(rowValues.recurso)) return false;
+        if (excludeKey !== 'numero' && selections.numeros.length && !selections.numeros.includes(rowValues.numero)) return false;
+        return true;
+      }
+
+      function uniqueSorted(values, numeric = false) {
+        return Array.from(new Set(values.filter(v => v !== ''))).sort((a, b) => a.localeCompare(b, 'es', numeric ? { numeric: true } : undefined));
+      }
+
+      function rebuildDependentOptions() {
+        const current = getSelections();
+
+        const depOptions = uniqueSorted(
+          cdpDataCache
+            .map(getRowValues)
+            .filter(v => rowMatchesSelections(v, current, 'dep'))
+            .map(v => v.depFull)
+        );
+
+        const rubroOptions = uniqueSorted(
+          cdpDataCache
+            .map(getRowValues)
+            .filter(v => rowMatchesSelections(v, current, 'rubro'))
+            .map(v => v.rubro)
+        );
+
+        const recursoOptions = uniqueSorted(
+          cdpDataCache
+            .map(getRowValues)
+            .filter(v => rowMatchesSelections(v, current, 'recurso'))
+            .map(v => v.recurso)
+        );
+
+        const numeroOptions = uniqueSorted(
+          cdpDataCache
+            .map(getRowValues)
+            .filter(v => rowMatchesSelections(v, current, 'numero'))
+            .map(v => v.numero),
+          true
+        );
+
+        buildFilterDropdown(depContainer, 'Todas las dependencias', depOptions);
+        buildFilterDropdownWithSearch(rubroContainer, 'Todos los rubros', rubroOptions, 'Buscar rubro...');
+        buildFilterDropdownWithSearch(recursoContainer, 'Todos los recursos', recursoOptions, 'Buscar recurso...');
+        buildFilterDropdownWithSearch(numeroContainer, 'Todos los CDP', numeroOptions, 'Buscar CDP...');
+
+        setCheckedValues(depContainer, current.deps.filter(v => depOptions.includes(v)));
+        setCheckedValues(rubroContainer, current.rubros.filter(v => rubroOptions.includes(v)));
+        setCheckedValues(recursoContainer, current.recursos.filter(v => recursoOptions.includes(v)));
+        setCheckedValues(numeroContainer, current.numeros.filter(v => numeroOptions.includes(v)));
+
+        const depPanel = depContainer.querySelector('.filter-panel');
+        const rubroPanel = rubroContainer.querySelector('.filter-panel');
+        const recursoPanel = recursoContainer.querySelector('.filter-panel');
+        const numeroPanel = numeroContainer.querySelector('.filter-panel');
+        if (depPanel) depPanel.onchange = applyFilters;
+        if (rubroPanel) rubroPanel.onchange = applyFilters;
+        if (recursoPanel) recursoPanel.onchange = applyFilters;
+        if (numeroPanel) numeroPanel.onchange = applyFilters;
+      }
+
       function applyFilters() {
-        const selDeps = new Set(getCheckedValues(depContainer));
-        const selRubros = new Set(getCheckedValues(rubroContainer));
-        const selNumeros = new Set(getCheckedValues(numeroContainer));
+        rebuildDependentOptions();
+        const selections = getSelections();
+        const selDeps = new Set(selections.deps);
+        const selRubros = new Set(selections.rubros);
+        const selRecursos = new Set(selections.recursos);
+        const selNumeros = new Set(selections.numeros);
         cdpFilteredDataCache = cdpDataCache.filter(row => {
           const dep = row.dependencia || '';
           const depDesc = row.dependencia_descripcion || '';
           const depFull = depDesc ? `${dep} - ${depDesc}` : dep;
           const rubro = row.rubro || '';
+          const recurso = row.recurso || '';
           const numeroDocumento = row.numero_documento !== null && row.numero_documento !== undefined
-            ? String(row.numero_documento)
+            ? String(row.numero_documento).trim()
             : '';
 
           if (selDeps.size && !selDeps.has(depFull)) return false;
           if (selRubros.size && !selRubros.has(rubro)) return false;
+          if (selRecursos.size && !selRecursos.has(recurso)) return false;
           if (selNumeros.size && !selNumeros.has(numeroDocumento)) return false;
 
           if (searchTerm) {
@@ -1005,17 +1158,10 @@
         renderCdpTable();
       }
 
-      const depPanel = depContainer.querySelector('.filter-panel');
-      const rubroPanel = rubroContainer.querySelector('.filter-panel');
-      const numeroPanel = numeroContainer.querySelector('.filter-panel');
-      if (depPanel) depPanel.addEventListener('change', applyFilters);
-      if (rubroPanel) rubroPanel.addEventListener('change', applyFilters);
-      if (numeroPanel) numeroPanel.addEventListener('change', applyFilters);
-
-      searchInput.addEventListener('input', (e) => {
+      searchInput.oninput = (e) => {
         searchTerm = (e.target.value || '').toString().trim().toLowerCase();
         applyFilters();
-      });
+      };
 
       cdpFilteredDataCache = cdpDataCache.slice();
       applyFilters();
@@ -1024,34 +1170,10 @@
     function setupCrpFilters() {
       const depContainer = document.getElementById('crp-filter-dependencia');
       const rubroContainer = document.getElementById('crp-filter-rubro');
+      const recursoContainer = document.getElementById('crp-filter-recurso');
       const cdpContainer = document.getElementById('crp-filter-cdp');
       const searchInput = document.getElementById('crp-search-input');
-      if (!depContainer || !rubroContainer || !cdpContainer || !searchInput) return;
-
-      const deps = Array.from(new Set(
-        crpDataCache
-          .map(r => {
-            const dep = r.dependencia || '';
-            const depDesc = r.dependencia_descripcion || '';
-            return depDesc ? `${dep} - ${depDesc}` : dep;
-          })
-          .filter(Boolean)
-      )).sort((a, b) => a.localeCompare(b, 'es'));
-
-      const rubros = Array.from(new Set(
-        crpDataCache.map(r => r.rubro || '').filter(Boolean)
-      )).sort((a, b) => a.localeCompare(b, 'es'));
-
-      const cdps = Array.from(new Set(
-        crpDataCache
-          .map(r => r.cdp)
-          .filter(v => v !== null && v !== undefined && String(v).trim() !== '')
-          .map(v => String(v).trim())
-      )).sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
-
-      buildFilterDropdown(depContainer, 'Todas las dependencias', deps);
-      buildFilterDropdown(rubroContainer, 'Todos los rubros', rubros);
-      buildFilterDropdownWithSearch(cdpContainer, 'Todos los CDP', cdps, 'Buscar CDP...');
+      if (!depContainer || !rubroContainer || !recursoContainer || !cdpContainer || !searchInput) return;
 
       let searchTerm = '';
 
@@ -1059,21 +1181,121 @@
         return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(i => i.value);
       }
 
+      function setCheckedValues(container, selectedValues) {
+        const selected = new Set(selectedValues || []);
+        container.querySelectorAll('input[type="checkbox"]').forEach(input => {
+          input.checked = selected.has(input.value);
+        });
+        const panel = container.querySelector('.filter-panel');
+        if (panel) {
+          panel.dispatchEvent(new Event('change'));
+        }
+      }
+
+      function getSelections() {
+        return {
+          deps: getCheckedValues(depContainer),
+          rubros: getCheckedValues(rubroContainer),
+          recursos: getCheckedValues(recursoContainer),
+          cdps: getCheckedValues(cdpContainer),
+        };
+      }
+
+      function getRowValues(row) {
+        const dep = row.dependencia || '';
+        const depDesc = row.dependencia_descripcion || '';
+        return {
+          depFull: depDesc ? `${dep} - ${depDesc}` : dep,
+          rubro: row.rubro || '',
+          recurso: row.recurso || '',
+          cdp: row.cdp !== null && row.cdp !== undefined ? String(row.cdp).trim() : '',
+        };
+      }
+
+      function rowMatchesSelections(rowValues, selections, excludeKey = '') {
+        if (excludeKey !== 'dep' && selections.deps.length && !selections.deps.includes(rowValues.depFull)) return false;
+        if (excludeKey !== 'rubro' && selections.rubros.length && !selections.rubros.includes(rowValues.rubro)) return false;
+        if (excludeKey !== 'recurso' && selections.recursos.length && !selections.recursos.includes(rowValues.recurso)) return false;
+        if (excludeKey !== 'cdp' && selections.cdps.length && !selections.cdps.includes(rowValues.cdp)) return false;
+        return true;
+      }
+
+      function uniqueSorted(values, numeric = false) {
+        return Array.from(new Set(values.filter(v => v !== ''))).sort((a, b) => a.localeCompare(b, 'es', numeric ? { numeric: true } : undefined));
+      }
+
+      function rebuildDependentOptions() {
+        const current = getSelections();
+
+        const depOptions = uniqueSorted(
+          crpDataCache
+            .map(getRowValues)
+            .filter(v => rowMatchesSelections(v, current, 'dep'))
+            .map(v => v.depFull)
+        );
+
+        const rubroOptions = uniqueSorted(
+          crpDataCache
+            .map(getRowValues)
+            .filter(v => rowMatchesSelections(v, current, 'rubro'))
+            .map(v => v.rubro)
+        );
+
+        const recursoOptions = uniqueSorted(
+          crpDataCache
+            .map(getRowValues)
+            .filter(v => rowMatchesSelections(v, current, 'recurso'))
+            .map(v => v.recurso)
+        );
+
+        const cdpOptions = uniqueSorted(
+          crpDataCache
+            .map(getRowValues)
+            .filter(v => rowMatchesSelections(v, current, 'cdp'))
+            .map(v => v.cdp),
+          true
+        );
+
+        buildFilterDropdown(depContainer, 'Todas las dependencias', depOptions);
+        buildFilterDropdownWithSearch(rubroContainer, 'Todos los rubros', rubroOptions, 'Buscar rubro...');
+        buildFilterDropdownWithSearch(recursoContainer, 'Todos los recursos', recursoOptions, 'Buscar recurso...');
+        buildFilterDropdownWithSearch(cdpContainer, 'Todos los CDP', cdpOptions, 'Buscar CDP...');
+
+        setCheckedValues(depContainer, current.deps.filter(v => depOptions.includes(v)));
+        setCheckedValues(rubroContainer, current.rubros.filter(v => rubroOptions.includes(v)));
+        setCheckedValues(recursoContainer, current.recursos.filter(v => recursoOptions.includes(v)));
+        setCheckedValues(cdpContainer, current.cdps.filter(v => cdpOptions.includes(v)));
+
+        const depPanel = depContainer.querySelector('.filter-panel');
+        const rubroPanel = rubroContainer.querySelector('.filter-panel');
+        const recursoPanel = recursoContainer.querySelector('.filter-panel');
+        const cdpPanel = cdpContainer.querySelector('.filter-panel');
+        if (depPanel) depPanel.onchange = applyFilters;
+        if (rubroPanel) rubroPanel.onchange = applyFilters;
+        if (recursoPanel) recursoPanel.onchange = applyFilters;
+        if (cdpPanel) cdpPanel.onchange = applyFilters;
+      }
+
       function applyFilters() {
-        const selDeps = new Set(getCheckedValues(depContainer));
-        const selRubros = new Set(getCheckedValues(rubroContainer));
-        const selCdps = new Set(getCheckedValues(cdpContainer));
+        rebuildDependentOptions();
+        const selections = getSelections();
+        const selDeps = new Set(selections.deps);
+        const selRubros = new Set(selections.rubros);
+        const selRecursos = new Set(selections.recursos);
+        const selCdps = new Set(selections.cdps);
         crpFilteredDataCache = crpDataCache.filter(row => {
           const dep = row.dependencia || '';
           const depDesc = row.dependencia_descripcion || '';
           const depFull = depDesc ? `${dep} - ${depDesc}` : dep;
           const rubro = row.rubro || '';
+          const recurso = row.recurso || '';
           const cdp = row.cdp !== null && row.cdp !== undefined
-            ? String(row.cdp)
+            ? String(row.cdp).trim()
             : '';
 
           if (selDeps.size && !selDeps.has(depFull)) return false;
           if (selRubros.size && !selRubros.has(rubro)) return false;
+          if (selRecursos.size && !selRecursos.has(recurso)) return false;
           if (selCdps.size && !selCdps.has(cdp)) return false;
 
           if (searchTerm) {
@@ -1097,17 +1319,10 @@
         renderCrpTable();
       }
 
-      const depPanel = depContainer.querySelector('.filter-panel');
-      const rubroPanel = rubroContainer.querySelector('.filter-panel');
-      const cdpPanel = cdpContainer.querySelector('.filter-panel');
-      if (depPanel) depPanel.addEventListener('change', applyFilters);
-      if (rubroPanel) rubroPanel.addEventListener('change', applyFilters);
-      if (cdpPanel) cdpPanel.addEventListener('change', applyFilters);
-
-      searchInput.addEventListener('input', (e) => {
+      searchInput.oninput = (e) => {
         searchTerm = (e.target.value || '').toString().trim().toLowerCase();
         applyFilters();
-      });
+      };
 
       crpFilteredDataCache = crpDataCache.slice();
       applyFilters();
@@ -1167,7 +1382,7 @@
       )).sort((a, b) => a.localeCompare(b, 'es'));
 
       buildFilterDropdown(depContainer, 'Todas las dependencias', deps);
-      buildFilterDropdown(rubroContainer, 'Todos los rubros', rubros);
+      buildFilterDropdownWithSearch(rubroContainer, 'Todos los rubros', rubros, 'Buscar rubro...');
       buildFilterDropdown(recursoContainer, 'Todos los recursos', recursos);
 
       function getCheckedValues(container) {
@@ -1566,6 +1781,283 @@
       });
     }
 
+    function normalizeJoinValue(value) {
+      if (value === null || value === undefined) return '';
+      return value
+        .toString()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function dependencyJoinKey(value) {
+      const normalized = normalizeJoinValue(value);
+      const codeMatch = normalized.match(/\b\d{4,}\b/);
+      if (codeMatch) return codeMatch[0];
+      return normalized;
+    }
+
+    function rubroJoinKey(value) {
+      return normalizeJoinValue(value).replace(/\s+/g, '');
+    }
+
+    function summarizeNumberList(values, maxItems = 2) {
+      const sorted = (values || []).slice().sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
+      if (!sorted.length) return '0';
+      if (sorted.length <= maxItems) return `${sorted.length} (${sorted.join(', ')})`;
+      return `${sorted.length} (${sorted.slice(0, maxItems).join(', ')}...)`;
+    }
+
+    function setupCruceTable() {
+      const container = document.getElementById('table-cruce-container');
+      const depContainer = document.getElementById('cruce-filter-dependencia');
+      const rubroContainer = document.getElementById('cruce-filter-rubro');
+      const cdpContainer = document.getElementById('cruce-filter-cdp');
+      const crpContainer = document.getElementById('cruce-filter-crp');
+      const searchInput = document.getElementById('cruce-search-input');
+      const summaryEl = document.getElementById('cruce-table-summary');
+      const exportBtn = document.getElementById('cruce-export-btn');
+      const bodyEl = document.getElementById('cruce-table-body');
+      const pageInfoEl = document.getElementById('cruce-page-info');
+      const pageCurrentEl = document.getElementById('cruce-page-current');
+      const pagePrevEl = document.getElementById('cruce-page-prev');
+      const pageNextEl = document.getElementById('cruce-page-next');
+
+      if (!container || !depContainer || !rubroContainer || !cdpContainer || !crpContainer || !searchInput || !summaryEl || !exportBtn || !bodyEl || !pageInfoEl || !pageCurrentEl || !pagePrevEl || !pageNextEl) return;
+
+      const crossMap = new Map();
+
+      function getOrCreateCrossRow(depValue, rubroValue) {
+        const depKey = dependencyJoinKey(depValue);
+        const rubroKey = rubroJoinKey(rubroValue);
+        if (!depKey || !rubroKey) return null;
+
+        const key = `${depKey}|${rubroKey}`;
+        if (!crossMap.has(key)) {
+          crossMap.set(key, {
+            key,
+            dependencia: depValue || 'Sin dependencia',
+            rubro: rubroValue || 'Sin rubro',
+            ejeApropiacion: 0,
+            cdpValorActual: 0,
+            crpValorActual: 0,
+            cdpDocs: new Set(),
+            crpDocs: new Set(),
+            crpLinkedCdps: new Set(),
+          });
+        }
+        return crossMap.get(key);
+      }
+
+      const ejeRows = (ejeDataCache || []).filter(r => r.es_resumen === true || r.es_resumen === 1);
+      ejeRows.forEach(row => {
+        const dep = row.dependecia_de_afectacion_de_gastos || '';
+        const rubro = buildRubroCodigo(row) || row.rubro || '';
+        const target = getOrCreateCrossRow(dep, rubro);
+        if (!target) return;
+        target.ejeApropiacion += Number(row.apropiacion_vigente_dep_gsto) || 0;
+      });
+
+      (cdpDataCache || []).forEach(row => {
+        const dep = (row.dependencia_descripcion || '').trim()
+          ? `${row.dependencia || ''} - ${row.dependencia_descripcion || ''}`
+          : (row.dependencia || '');
+        const rubro = row.rubro || '';
+        const target = getOrCreateCrossRow(dep, rubro);
+        if (!target) return;
+        target.cdpValorActual += Number(row.valor_actual) || 0;
+        if (row.numero_documento !== null && row.numero_documento !== undefined && String(row.numero_documento).trim() !== '') {
+          target.cdpDocs.add(String(row.numero_documento).trim());
+        }
+      });
+
+      (crpDataCache || []).forEach(row => {
+        const dep = (row.dependencia_descripcion || '').trim()
+          ? `${row.dependencia || ''} - ${row.dependencia_descripcion || ''}`
+          : (row.dependencia || '');
+        const rubro = row.rubro || '';
+        const target = getOrCreateCrossRow(dep, rubro);
+        if (!target) return;
+        target.crpValorActual += Number(row.valor_actual) || 0;
+        if (row.numero_documento !== null && row.numero_documento !== undefined && String(row.numero_documento).trim() !== '') {
+          target.crpDocs.add(String(row.numero_documento).trim());
+        }
+        if (row.cdp !== null && row.cdp !== undefined && String(row.cdp).trim() !== '') {
+          target.crpLinkedCdps.add(String(row.cdp).trim());
+        }
+      });
+
+      const baseRows = Array.from(crossMap.values()).filter(row => {
+        return row.ejeApropiacion !== 0 || row.cdpValorActual !== 0 || row.crpValorActual !== 0 || row.cdpDocs.size > 0 || row.crpDocs.size > 0;
+      });
+
+      cruceDataCache = baseRows;
+      cruceFilteredDataCache = baseRows.slice();
+
+      const deps = Array.from(new Set(baseRows.map(r => r.dependencia).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'es'));
+      const rubros = Array.from(new Set(baseRows.map(r => r.rubro).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'es'));
+      const cdps = Array.from(new Set(baseRows.flatMap(r => Array.from(r.cdpDocs)))).sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
+      const crps = Array.from(new Set(baseRows.flatMap(r => Array.from(r.crpDocs)))).sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
+
+      buildFilterDropdownWithSearch(depContainer, 'Todas las dependencias', deps, 'Buscar dependencia...');
+      buildFilterDropdownWithSearch(rubroContainer, 'Todos los rubros', rubros, 'Buscar rubro...');
+      buildFilterDropdownWithSearch(cdpContainer, 'Todos los CDP', cdps, 'Buscar CDP...');
+      buildFilterDropdownWithSearch(crpContainer, 'Todos los CRP', crps, 'Buscar CRP...');
+
+      let filteredRows = baseRows.slice();
+      let searchTerm = (searchInput.value || '').toString().trim().toLowerCase();
+
+      function getCheckedValues(filterContainer) {
+        return Array.from(filterContainer.querySelectorAll('input[type="checkbox"]:checked')).map(i => i.value);
+      }
+
+      function renderCruceRows() {
+        bodyEl.innerHTML = '';
+        const total = filteredRows.length;
+        const totalPages = total > 0 ? Math.max(1, Math.ceil(total / DETAIL_PAGE_SIZE)) : 1;
+        if (cruceCurrentPage > totalPages) cruceCurrentPage = totalPages;
+
+        const startIdx = (cruceCurrentPage - 1) * DETAIL_PAGE_SIZE;
+        const endIdx = startIdx + DETAIL_PAGE_SIZE;
+        const pageRows = filteredRows.slice(startIdx, endIdx);
+
+        pageRows.forEach(row => {
+          const cdpDocs = Array.from(row.cdpDocs);
+          const crpDocs = Array.from(row.crpDocs);
+          const linkedCdps = Array.from(row.crpLinkedCdps);
+          const div = document.createElement('div');
+          div.className = 'data-table-row data-table-row-cruce';
+          div.innerHTML = `
+            <span title="${row.dependencia}">${row.dependencia.slice(0, 40)}${row.dependencia.length > 40 ? '…' : ''}</span>
+            <span title="${row.rubro}">${row.rubro.slice(0, 24)}${row.rubro.length > 24 ? '…' : ''}</span>
+            <span>$ ${formatMoney(row.ejeApropiacion)}</span>
+            <span>$ ${formatMoney(row.cdpValorActual)}</span>
+            <span>$ ${formatMoney(row.crpValorActual)}</span>
+            <span title="${cdpDocs.join(', ')}">${summarizeNumberList(cdpDocs)}</span>
+            <span title="${crpDocs.join(', ')}">${summarizeNumberList(crpDocs)}</span>
+            <span title="${linkedCdps.join(', ')}">${summarizeNumberList(linkedCdps)}</span>
+          `;
+          bodyEl.appendChild(div);
+        });
+
+        if (total === 0) {
+          pageInfoEl.textContent = 'Sin resultados para los filtros seleccionados.';
+          pageCurrentEl.textContent = '';
+          pagePrevEl.disabled = true;
+          pageNextEl.disabled = true;
+        } else {
+          const startHuman = startIdx + 1;
+          const endHuman = Math.min(endIdx, total);
+          pageInfoEl.textContent = `Mostrando ${startHuman}-${endHuman} de ${total} filas`;
+          pageCurrentEl.textContent = `Página ${cruceCurrentPage} de ${totalPages}`;
+          pagePrevEl.disabled = cruceCurrentPage === 1;
+          pageNextEl.disabled = cruceCurrentPage === totalPages;
+        }
+      }
+
+      function applyCruceFilters() {
+        const selDeps = new Set(getCheckedValues(depContainer));
+        const selRubros = new Set(getCheckedValues(rubroContainer));
+        const selCdps = new Set(getCheckedValues(cdpContainer));
+        const selCrps = new Set(getCheckedValues(crpContainer));
+
+        filteredRows = baseRows.filter(row => {
+          if (selDeps.size && !selDeps.has(row.dependencia)) return false;
+          if (selRubros.size && !selRubros.has(row.rubro)) return false;
+
+          if (selCdps.size) {
+            const hasCdp = Array.from(row.cdpDocs).some(v => selCdps.has(v));
+            if (!hasCdp) return false;
+          }
+
+          if (selCrps.size) {
+            const hasCrp = Array.from(row.crpDocs).some(v => selCrps.has(v));
+            if (!hasCrp) return false;
+          }
+
+          if (searchTerm) {
+            const haystack = [
+              row.dependencia,
+              row.rubro,
+              ...Array.from(row.cdpDocs),
+              ...Array.from(row.crpDocs),
+              ...Array.from(row.crpLinkedCdps),
+            ]
+              .map(v => (v || '').toString().toLowerCase())
+              .join(' ');
+            if (!haystack.includes(searchTerm)) return false;
+          }
+
+          return true;
+        });
+
+        cruceFilteredDataCache = filteredRows.slice();
+        cruceCurrentPage = 1;
+        const totalEje = filteredRows.reduce((acc, row) => acc + (Number(row.ejeApropiacion) || 0), 0);
+        const totalCdp = filteredRows.reduce((acc, row) => acc + (Number(row.cdpValorActual) || 0), 0);
+        const totalCrp = filteredRows.reduce((acc, row) => acc + (Number(row.crpValorActual) || 0), 0);
+        summaryEl.textContent = `Cruces: ${filteredRows.length}. EJE aprop. vigente: $ ${formatMoney(totalEje)}. Apropiación valor actual: $ ${formatMoney(totalCdp)}. Ejecución valor actual: $ ${formatMoney(totalCrp)}.`;
+        renderCruceRows();
+      }
+
+      exportBtn.onclick = () => {
+        const columns = [
+          { key: 'dependencia', header: 'Dependencia' },
+          { key: 'rubro', header: 'Rubro' },
+          { key: 'ejeApropiacion', header: 'Aprop. vigente EJE' },
+          { key: 'cdpValorActual', header: 'Valor actual Apropiación' },
+          { key: 'crpValorActual', header: 'Valor actual Ejecución' },
+          { key: 'cdpCount', header: 'Cantidad CDP', getter: row => row.cdpDocs.size },
+          { key: 'crpCount', header: 'Cantidad CRP', getter: row => row.crpDocs.size },
+          { key: 'cdpList', header: 'CDP (todos)', getter: row => Array.from(row.cdpDocs).sort((a, b) => a.localeCompare(b, 'es', { numeric: true })).join(', ') },
+          { key: 'crpList', header: 'CRP (todos)', getter: row => Array.from(row.crpDocs).sort((a, b) => a.localeCompare(b, 'es', { numeric: true })).join(', ') },
+          { key: 'linkedList', header: 'Vínculo CRP->CDP (todos)', getter: row => Array.from(row.crpLinkedCdps).sort((a, b) => a.localeCompare(b, 'es', { numeric: true })).join(', ') },
+        ];
+
+        exportRowsToExcel({
+          rows: cruceFilteredDataCache,
+          columns,
+          filename: 'cruce_filtrado.xlsx',
+          sheetName: 'Cruce',
+          numericKeys: ['ejeApropiacion', 'cdpValorActual', 'crpValorActual'],
+          colWidths: [34, 20, 20, 22, 22, 14, 14, 45, 45, 45],
+        });
+      };
+
+      const depPanel = depContainer.querySelector('.filter-panel');
+      const rubroPanel = rubroContainer.querySelector('.filter-panel');
+      const cdpPanel = cdpContainer.querySelector('.filter-panel');
+      const crpPanel = crpContainer.querySelector('.filter-panel');
+      if (depPanel) depPanel.addEventListener('change', applyCruceFilters);
+      if (rubroPanel) rubroPanel.addEventListener('change', applyCruceFilters);
+      if (cdpPanel) cdpPanel.addEventListener('change', applyCruceFilters);
+      if (crpPanel) crpPanel.addEventListener('change', applyCruceFilters);
+
+      searchInput.oninput = (e) => {
+        searchTerm = (e.target.value || '').toString().trim().toLowerCase();
+        applyCruceFilters();
+      };
+
+      pagePrevEl.onclick = () => {
+        if (cruceCurrentPage > 1) {
+          cruceCurrentPage -= 1;
+          renderCruceRows();
+        }
+      };
+
+      pageNextEl.onclick = () => {
+        const totalPages = filteredRows.length > 0 ? Math.max(1, Math.ceil(filteredRows.length / DETAIL_PAGE_SIZE)) : 1;
+        if (cruceCurrentPage < totalPages) {
+          cruceCurrentPage += 1;
+          renderCruceRows();
+        }
+      };
+
+      applyCruceFilters();
+    }
+
     function setupNav() {
       const btnDashboard = document.getElementById('nav-dashboard');
       const btnUpload = document.getElementById('nav-upload');
@@ -1593,6 +2085,7 @@
         eje: document.getElementById('table-eje-container'),
         cdp: document.getElementById('table-cdp-container'),
         crp: document.getElementById('table-crp-container'),
+        cruce: document.getElementById('table-cruce-container'),
       };
 
       buttons.forEach(btn => {
@@ -1666,11 +2159,191 @@
       }
     }
 
+    function exportRowsToExcel({ rows, columns, filename, sheetName, numericKeys = [], colWidths = [] }) {
+      if (!rows || !rows.length) {
+        alert('No hay filas para exportar con los filtros actuales.');
+        return;
+      }
+      if (!window.ExcelJS) {
+        alert('No se pudo cargar la librería para generar Excel.');
+        return;
+      }
+
+      const workbook = new ExcelJS.Workbook();
+      const sheet = workbook.addWorksheet(sheetName || 'Datos', {
+        views: [{ state: 'frozen', ySplit: 1 }],
+      });
+
+      const headerRow = sheet.addRow(columns.map(c => c.header));
+      headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      headerRow.alignment = { vertical: 'top', horizontal: 'center', wrapText: true };
+      headerRow.eachCell(cell => {
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FF009639' },
+        };
+      });
+
+      const numericColIndexes = [];
+      columns.forEach((col, idx) => {
+        if (numericKeys.includes(col.key)) numericColIndexes.push(idx + 1);
+      });
+
+      rows.forEach((row, idx) => {
+        const values = columns.map(c => {
+          const v = typeof c.getter === 'function' ? c.getter(row) : row[c.key];
+          return v === null || v === undefined ? '' : v;
+        });
+        const excelRow = sheet.addRow(values);
+        excelRow.eachCell(cell => {
+          cell.alignment = { vertical: 'top', horizontal: 'center', wrapText: true };
+        });
+        if (idx % 2 === 1) {
+          excelRow.eachCell(cell => {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFF3F4F6' },
+            };
+          });
+        }
+        numericColIndexes.forEach(colIndex => {
+          const cell = excelRow.getCell(colIndex);
+          if (typeof cell.value === 'number') {
+            cell.numFmt = '#,##0.00';
+          }
+        });
+      });
+
+      columns.forEach((_, idx) => {
+        const column = sheet.getColumn(idx + 1);
+        column.width = colWidths[idx] || 20;
+      });
+
+      sheet.autoFilter = {
+        from: { row: 1, column: 1 },
+        to: { row: 1, column: columns.length },
+      };
+
+      workbook.xlsx.writeBuffer().then(buffer => {
+        const blob = new Blob([buffer], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }).catch(err => {
+        console.error(err);
+        alert('Error generando el archivo Excel.');
+      });
+    }
+
+    function setupAdditionalTableExports() {
+      const cdpExportBtn = document.getElementById('cdp-export-btn');
+      const crpExportBtn = document.getElementById('crp-export-btn');
+
+      if (cdpExportBtn) {
+        cdpExportBtn.addEventListener('click', () => {
+          const columns = [
+            { key: 'id', header: 'ID' },
+            { key: 'numero_documento', header: 'Número documento' },
+            { key: 'fecha_registro', header: 'Fecha registro' },
+            { key: 'fecha_creacion', header: 'Fecha creación' },
+            { key: 'tipo_cdp', header: 'Tipo apropiación' },
+            { key: 'estado', header: 'Estado' },
+            { key: 'dependencia', header: 'Dependencia' },
+            { key: 'dependencia_descripcion', header: 'Dependencia descripción' },
+            { key: 'rubro', header: 'Rubro' },
+            { key: 'descripcion', header: 'Descripción' },
+            { key: 'fuente', header: 'Fuente' },
+            { key: 'recurso', header: 'Recurso' },
+            { key: 'sit', header: 'SIT' },
+            { key: 'valor_inicial', header: 'Valor inicial' },
+            { key: 'valor_operaciones', header: 'Valor operaciones' },
+            { key: 'valor_actual', header: 'Valor actual' },
+            { key: 'saldo_por_comprometer', header: 'Saldo por comprometer' },
+            { key: 'objeto', header: 'Objeto' },
+            { key: 'solicitud_cdp', header: 'Solicitud CDP' },
+            { key: 'fecha_corte', header: 'Fecha corte' },
+          ];
+
+          exportRowsToExcel({
+            rows: cdpFilteredDataCache,
+            columns,
+            filename: 'apropiacion_filtrada.xlsx',
+            sheetName: 'Apropiacion',
+            numericKeys: ['valor_inicial', 'valor_operaciones', 'valor_actual', 'saldo_por_comprometer'],
+            colWidths: [8, 16, 18, 18, 18, 14, 14, 26, 18, 30, 14, 14, 10, 16, 18, 16, 20, 28, 16, 14],
+          });
+        });
+      }
+
+      if (crpExportBtn) {
+        crpExportBtn.addEventListener('click', () => {
+          const columns = [
+            { key: 'id', header: 'ID' },
+            { key: 'numero_documento', header: 'Número documento' },
+            { key: 'fecha_registro', header: 'Fecha registro' },
+            { key: 'fecha_creacion', header: 'Fecha creación' },
+            { key: 'estado', header: 'Estado' },
+            { key: 'dependencia', header: 'Dependencia' },
+            { key: 'dependencia_descripcion', header: 'Dependencia descripción' },
+            { key: 'rubro', header: 'Rubro' },
+            { key: 'descripcion', header: 'Descripción' },
+            { key: 'fuente', header: 'Fuente' },
+            { key: 'recurso', header: 'Recurso' },
+            { key: 'situacion', header: 'Situación' },
+            { key: 'valor_inicial', header: 'Valor inicial' },
+            { key: 'valor_operaciones', header: 'Valor operaciones' },
+            { key: 'valor_actual', header: 'Valor actual' },
+            { key: 'saldo_por_utilizar', header: 'Saldo por utilizar' },
+            { key: 'tipo_identificacion', header: 'Tipo identificación' },
+            { key: 'identificacion', header: 'Identificación' },
+            { key: 'nombre_razon_social', header: 'Nombre o razón social' },
+            { key: 'medio_de_pago', header: 'Medio de pago' },
+            { key: 'tipo_cuenta', header: 'Tipo cuenta' },
+            { key: 'numero_cuenta', header: 'Número cuenta' },
+            { key: 'estado_cuenta', header: 'Estado cuenta' },
+            { key: 'entidad_nit', header: 'Entidad NIT' },
+            { key: 'entidad_descripcion', header: 'Entidad descripción' },
+            { key: 'solicitud_cdp', header: 'Solicitud CDP' },
+            { key: 'cdp', header: 'CDP' },
+            { key: 'compromisos', header: 'Compromisos' },
+            { key: 'cuentas_por_pagar', header: 'Cuentas por pagar' },
+            { key: 'obligaciones', header: 'Obligaciones' },
+            { key: 'ordenes_de_pago', header: 'Órdenes de pago' },
+            { key: 'reintegros', header: 'Reintegros' },
+            { key: 'fecha_documento_soporte', header: 'Fecha documento soporte' },
+            { key: 'tipo_documento_soporte', header: 'Tipo documento soporte' },
+            { key: 'numero_documento_soporte', header: 'Número documento soporte' },
+            { key: 'observaciones', header: 'Observaciones' },
+            { key: 'fecha_corte', header: 'Fecha corte' },
+          ];
+
+          exportRowsToExcel({
+            rows: crpFilteredDataCache,
+            columns,
+            filename: 'ejecucion_filtrada.xlsx',
+            sheetName: 'Ejecucion',
+            numericKeys: ['valor_inicial', 'valor_operaciones', 'valor_actual', 'saldo_por_utilizar'],
+            colWidths: [8, 16, 18, 18, 14, 14, 26, 18, 30, 14, 14, 14, 16, 18, 16, 18, 16, 16, 30, 16, 12, 16, 14, 14, 26, 16, 12, 26, 26, 24, 24, 20, 22, 24, 24, 30, 14],
+          });
+        });
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       setupNav();
       setupTableTabs();
       setupDetailPagination();
       setupUploads();
+      setupAdditionalTableExports();
       setupCentroFormacionFilter();
       const typeSelect = document.getElementById('totals-chart-type');
       if (typeSelect) {
