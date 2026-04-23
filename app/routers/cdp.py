@@ -1,8 +1,9 @@
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Form
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 import pandas as pd
 from io import BytesIO
+from datetime import date
 
 from app.database import get_db
 from app.models import CDP
@@ -17,7 +18,11 @@ def listar_cdp(db: Session = Depends(get_db)):
 
 
 @router.post("/upload")
-async def upload_cdp(file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def upload_cdp(
+    fecha_corte: date | None = Form(None),
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
     if not file.filename.lower().endswith((".xlsx", ".xls")):
         raise HTTPException(status_code=400, detail="El archivo debe ser Excel (.xlsx o .xls)")
 
@@ -84,6 +89,7 @@ async def upload_cdp(file: UploadFile = File(...), db: Session = Depends(get_db)
             saldo_por_comprometer=row.get("saldo_por_comprometer"),
             objeto=str(row.get("objeto")) if not pd.isna(row.get("objeto")) else None,
             solicitud_cdp=int(row.get("solicitud_cdp")) if not pd.isna(row.get("solicitud_cdp")) else None,
+            fecha_corte=fecha_corte,
         )
         for _, row in df.iterrows()
     ]

@@ -1,8 +1,9 @@
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Form
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 import pandas as pd
 from io import BytesIO
+from datetime import date
 
 from app.database import get_db
 from app.models import CRP
@@ -17,7 +18,11 @@ def listar_crp(db: Session = Depends(get_db)):
 
 
 @router.post("/upload")
-async def upload_crp(file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def upload_crp(
+    fecha_corte: date | None = Form(None),
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
     if not file.filename.lower().endswith((".xlsx", ".xls")):
         raise HTTPException(status_code=400, detail="El archivo debe ser Excel (.xlsx o .xls)")
 
@@ -82,6 +87,7 @@ async def upload_crp(file: UploadFile = File(...), db: Session = Depends(get_db)
     records = []
     for _, row in df.iterrows():
         data = {col: _nan_to_none(row.get(col)) for col in required_cols}
+        data["fecha_corte"] = fecha_corte
         records.append(CRP(**data))
 
     db.bulk_save_objects(records)

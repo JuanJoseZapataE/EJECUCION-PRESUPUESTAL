@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, DECIMAL, Text, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, DECIMAL, Text, Boolean, Date
 
 from .database import Base
 
@@ -25,6 +25,7 @@ class CDP(Base):
     saldo_por_comprometer = Column(DECIMAL(18, 2))
     objeto = Column(String(500))
     solicitud_cdp = Column(Integer)
+    fecha_corte = Column(Date)
 
 
 class CRP(Base):
@@ -66,6 +67,7 @@ class CRP(Base):
     tipo_documento_soporte = Column(String(100))
     numero_documento_soporte = Column(String(100))
     observaciones = Column(Text)
+    fecha_corte = Column(Date)
 
 
 class Eje(Base):
@@ -100,3 +102,4 @@ class Eje(Base):
     pagos_dep_gstos = Column(DECIMAL(18, 2))
     ordenes_pago_por_pagar_dep_gstos = Column(DECIMAL(18, 2))
     total_reintegros_dep_gstos = Column(DECIMAL(18, 2))
+    fecha_corte = Column(Date)

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Form
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 import pandas as pd
@@ -8,6 +8,7 @@ from openpyxl import load_workbook
 
 from app.database import get_db
 from app.models import Eje
+from datetime import date
 
 router = APIRouter()
 
@@ -19,7 +20,11 @@ def listar_eje(db: Session = Depends(get_db)):
 
 
 @router.post("/upload")
-async def upload_eje(file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def upload_eje(
+    fecha_corte: date | None = Form(None),
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
     if not file.filename.lower().endswith((".xlsx", ".xls")):
         raise HTTPException(status_code=400, detail="El archivo debe ser Excel (.xlsx o .xls)")
 
@@ -184,6 +189,7 @@ async def upload_eje(file: UploadFile = File(...), db: Session = Depends(get_db)
                 else:
                     data[field] = _nan_to_none(value)
 
+            data["fecha_corte"] = fecha_corte
             records.append(Eje(**data))
 
     if not records:

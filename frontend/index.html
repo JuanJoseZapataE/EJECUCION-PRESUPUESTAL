@@ -78,6 +78,10 @@
     .filter-group { display: flex; flex-direction: column; gap: 4px; }
     .filter-label { font-size: 0.78rem; color: var(--text-muted); }
 
+    .tab-switcher { display: flex; gap: 6px; margin: 6px 0 10px; }
+    .tab-btn { padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); background: #ffffff; font-size: 0.78rem; cursor: pointer; color: var(--text-muted); }
+    .tab-btn.active { background: var(--accent); color: #ffffff; border-color: var(--accent); }
+
     .filter-dropdown { position: relative; }
     .filter-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border); background: #ffffff; font-size: 0.78rem; cursor: pointer; color: var(--text); }
     .filter-toggle span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -88,11 +92,15 @@
     .filter-option { display: flex; align-items: center; gap: 6px; padding: 2px 0; font-size: 0.78rem; }
     .filter-option input { accent-color: var(--accent); }
 
+    .filter-text { padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.78rem; }
+
     .data-table { margin-top: 8px; border-radius: 12px; border: 1px solid var(--border); background: #ffffff; overflow: hidden; font-size: 0.78rem; }
-    .data-table-header, .data-table-row { display: grid; grid-template-columns: 1.4fr 1.2fr 1fr 1fr; padding: 6px 10px; align-items: center; }
+    .data-table-header, .data-table-row { display: grid; grid-template-columns: 1.4fr 1.2fr 1fr 1fr; padding: 9px 10px; align-items: center; }
     .data-table-header { background: #f3f4f6; color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); }
     .data-table-row:nth-child(even) { background: #f9fafb; }
     .data-table-row:nth-child(odd) { background: #ffffff; }
+    .data-table-header-eje, .data-table-row-eje { grid-template-columns: 1.25fr 1.15fr 1fr 0.75fr 1fr; }
+    .data-table-header-5, .data-table-row-5 { grid-template-columns: 0.7fr 0.8fr 1.7fr 1.1fr 0.7fr; }
 
     .pagination { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-top: 1px solid var(--border); font-size: 0.78rem; background: #ffffff; }
     .pagination-info { color: var(--text-muted); }
@@ -103,6 +111,10 @@
     .pagination-current { font-weight: 500; color: var(--text); font-size: 0.76rem; }
 
     .chart-container { margin-top: 6px; position: relative; height: 220px; }
+    .center-filter-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(220px, 0.7fr); gap: 12px; align-items: end; }
+    @media (max-width: 900px) { .center-filter-grid { grid-template-columns: minmax(0, 1fr); } }
+    .center-filter-box { display: flex; flex-direction: column; gap: 6px; }
+    .center-filter-help { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; }
   </style>
 </head>
 <body>
@@ -124,6 +136,56 @@
     </nav>
 
     <main id="view-dashboard">
+      <section class="card card-full">
+        <div class="card-inner">
+          <div class="card-header">
+            <div class="card-title">Centro de formación</div>
+          </div>
+          <div class="center-filter-grid">
+            <div class="center-filter-box">
+              <label class="filter-label" for="centro-formacion-filter">Filtra EJE, Apropiación y Ejecución por centro de formación</label>
+              <select id="centro-formacion-filter" class="filter-text" style="padding: 10px 12px; font-size: 0.92rem; width: 100%;"></select>
+            </div>
+            <div class="center-filter-help">
+              Este filtro agrupa los registros según el prefijo numérico de la dependencia: 1010 Dirección Regional, 9308 Centro de Comercio y Servicios, 9121 Centro Atención Sector Agropecuario y 9223 Centro de Diseño e Innovación Tecnológica.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-inner">
+          <div class="card-header">
+            <div class="card-title">Resumen general</div>
+          </div>
+
+          <div class="metric-row">
+            <span class="muted">Total Apropiación (valor inicial)</span>
+            <strong id="resumen-cdp-total">&mdash;</strong>
+          </div>
+          <div class="metric-row">
+            <span class="muted">Total Ejecución (valor inicial)</span>
+            <strong id="resumen-crp-total">&mdash;</strong>
+          </div>
+          <div class="metric-row">
+            <span class="muted">Total EJE (apropiación vigente, filas resumen)</span>
+            <strong id="resumen-eje-total">&mdash;</strong>
+          </div>
+          <div class="metric-row">
+            <span class="muted">Fecha de corte Apropiación</span>
+            <strong id="resumen-cdp-fecha-corte">&mdash;</strong>
+          </div>
+          <div class="metric-row">
+            <span class="muted">Fecha de corte Ejecución</span>
+            <strong id="resumen-crp-fecha-corte">&mdash;</strong>
+          </div>
+          <div class="metric-row">
+            <span class="muted">Fecha de corte EJE</span>
+            <strong id="resumen-eje-fecha-corte">&mdash;</strong>
+          </div>
+        </div>
+      </section>
+
       <section class="card">
         <div class="card-inner">
           <div class="card-header">
@@ -167,9 +229,27 @@
           <div class="card-header">
             <div class="card-title">EJE &mdash; Gráfico de ejecución</div>
           </div>
-          <p class="muted">Comparación de apropiación vigente, CDP y obligaciones (filas resumen).</p>
+          <p class="muted">Comparación de apropiación vigente, Apropiación y obligaciones (filas resumen).</p>
           <div class="chart-container">
             <canvas id="eje-chart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-inner">
+          <div class="card-header">
+            <div class="card-title">Comparación global Apropiación / Ejecución / EJE</div>
+            <select id="totals-chart-type" class="filter-text" style="max-width: 160px;">
+              <option value="bar" selected>Barras</option>
+              <option value="line">Líneas</option>
+              <option value="pie">Torta</option>
+              <option value="doughnut">Dona</option>
+            </select>
+          </div>
+          <p class="muted">Compara la apropiación vigente del EJE con los valores actuales de Apropiación y Ejecución.</p>
+          <div class="chart-container">
+            <canvas id="totals-chart"></canvas>
           </div>
         </div>
       </section>
@@ -183,6 +263,17 @@
             </div>
           </div>
 
+          <div class="tab-switcher">
+            <button type="button" class="tab-btn active" data-table="eje">EJE</button>
+            <button type="button" class="tab-btn" data-table="cdp">Apropiación</button>
+            <button type="button" class="tab-btn" data-table="crp">Ejecución</button>
+          </div>
+
+          <div id="table-eje-container">
+          <div class="filter-group">
+            <label class="filter-label" for="eje-search-input">Buscar por texto (dependencia / rubro / recurso / concepto)</label>
+            <input id="eje-search-input" type="text" class="filter-text" placeholder="Escribe una palabra clave..." />
+          </div>
           <div class="filters">
             <div class="filter-group">
               <label class="filter-label" for="filter-dependencia">Dependencia de afectación de gastos</label>
@@ -206,10 +297,11 @@
           </div>
 
           <div class="data-table" id="eje-pivot-table" aria-label="Detalle EJE filtrable">
-            <div class="data-table-header">
+            <div class="data-table-header data-table-header-eje">
               <span>Dependencia</span>
               <span>Rubro</span>
               <span>Recurso</span>
+              <span>SIIF</span>
               <span>Apropiación vigente</span>
             </div>
             <div id="eje-pivot-body"></div>
@@ -219,6 +311,89 @@
                 <button type="button" class="pagination-button" id="eje-page-prev">Anterior</button>
                 <span class="pagination-current" id="eje-page-current"></span>
                 <button type="button" class="pagination-button" id="eje-page-next">Siguiente</button>
+              </div>
+            </div>
+          </div>
+          </div>
+
+          <div id="table-cdp-container" style="display:none;">
+            <p class="muted">Tabla de detalle Apropiación.</p>
+            <div class="filter-group" style="margin-bottom:10px;">
+              <label class="filter-label" for="cdp-search-input">Buscar Apropiación por dependencia, rubro, tipo o número</label>
+              <input id="cdp-search-input" type="text" class="filter-text" placeholder="Escribe una palabra clave..." />
+            </div>
+            <div class="filters" style="margin-top:0;">
+              <div class="filter-group">
+                <label class="filter-label" for="cdp-filter-dependencia">Dependencia</label>
+                <div id="cdp-filter-dependencia" class="filter-dropdown"></div>
+              </div>
+              <div class="filter-group">
+                <label class="filter-label" for="cdp-filter-rubro">Rubro</label>
+                <div id="cdp-filter-rubro" class="filter-dropdown"></div>
+              </div>
+              <div class="filter-group">
+                <label class="filter-label" for="cdp-filter-numero">CDP</label>
+                <div id="cdp-filter-numero" class="filter-dropdown"></div>
+              </div>
+            </div>
+            <p class="muted" id="cdp-table-summary">Filtra la tabla de Apropiación y visualiza la sumatoria de valor actual.</p>
+            <div class="data-table" id="cdp-table" aria-label="Detalle Apropiación">
+              <div class="data-table-header data-table-header-5">
+                <span>Número documento</span>
+                <span>Tipo Apropiación</span>
+                <span>Dependencia</span>
+                <span>Rubro</span>
+                <span>Valor actual</span>
+              </div>
+              <div id="cdp-table-body"></div>
+              <div class="pagination" id="cdp-pagination">
+                <span class="pagination-info" id="cdp-page-info"></span>
+                <div class="pagination-controls">
+                  <button type="button" class="pagination-button" id="cdp-page-prev">Anterior</button>
+                  <span class="pagination-current" id="cdp-page-current"></span>
+                  <button type="button" class="pagination-button" id="cdp-page-next">Siguiente</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="table-crp-container" style="display:none;">
+            <p class="muted">Tabla de detalle Ejecución.</p>
+            <div class="filter-group" style="margin-bottom:10px;">
+              <label class="filter-label" for="crp-search-input">Buscar Ejecución por dependencia, rubro, apropiación o número</label>
+              <input id="crp-search-input" type="text" class="filter-text" placeholder="Escribe una palabra clave..." />
+            </div>
+            <div class="filters" style="margin-top:0;">
+              <div class="filter-group">
+                <label class="filter-label" for="crp-filter-dependencia">Dependencia</label>
+                <div id="crp-filter-dependencia" class="filter-dropdown"></div>
+              </div>
+              <div class="filter-group">
+                <label class="filter-label" for="crp-filter-rubro">Rubro</label>
+                <div id="crp-filter-rubro" class="filter-dropdown"></div>
+              </div>
+              <div class="filter-group">
+                <label class="filter-label" for="crp-filter-cdp">CDP</label>
+                <div id="crp-filter-cdp" class="filter-dropdown"></div>
+              </div>
+            </div>
+            <p class="muted" id="crp-table-summary">Filtra la tabla de Ejecución y visualiza la sumatoria de valor actual.</p>
+            <div class="data-table" id="crp-table" aria-label="Detalle Ejecución">
+              <div class="data-table-header data-table-header-5">
+                <span>Número documento</span>
+                <span>Dependencia</span>
+                <span>Rubro</span>
+                <span>Valor actual</span>
+                <span>Apropiación</span>
+              </div>
+              <div id="crp-table-body"></div>
+              <div class="pagination" id="crp-pagination">
+                <span class="pagination-info" id="crp-page-info"></span>
+                <div class="pagination-controls">
+                  <button type="button" class="pagination-button" id="crp-page-prev">Anterior</button>
+                  <span class="pagination-current" id="crp-page-current"></span>
+                  <button type="button" class="pagination-button" id="crp-page-next">Siguiente</button>
+                </div>
               </div>
             </div>
           </div>
@@ -236,11 +411,11 @@
             <div class="status" id="status-eje"><span class="dot"></span><span>Comprobando...</span></div>
           </div>
           <div class="metric-row">
-            <span class="muted">/cdp (GET)</span>
+            <span class="muted">Apropiación (/cdp GET)</span>
             <div class="status" id="status-cdp"><span class="dot"></span><span>Comprobando...</span></div>
           </div>
           <div class="metric-row">
-            <span class="muted">/crp (GET)</span>
+            <span class="muted">Ejecución (/crp GET)</span>
             <div class="status" id="status-crp"><span class="dot"></span><span>Comprobando...</span></div>
           </div>
 
@@ -259,30 +434,36 @@
             <div class="card-title">Subida de archivos</div>
           </div>
           <p class="muted" style="margin-bottom:10px;">
-            Carga los archivos Excel para cada módulo. Se enviarán a los endpoints <code>/cdp/upload</code>, <code>/crp/upload</code> y <code>/eje/upload</code>.
+            Carga los archivos Excel para cada módulo. Se enviarán a los endpoints de Apropiación (<code>/cdp/upload</code>), Ejecución (<code>/crp/upload</code>) y EJE (<code>/eje/upload</code>).
           </p>
           <div class="upload-grid">
             <div class="upload-card">
-              <div class="upload-title">CDP</div>
+              <div class="upload-title">Apropiación</div>
               <div class="upload-desc">Sube el archivo de certificados de disponibilidad presupuestal.</div>
               <input class="upload-input" type="file" id="file-cdp" accept=".xlsx,.xls" />
-              <button class="btn" type="button" data-module="cdp">Subir CDP</button>
+              <input class="upload-input" type="date" id="fecha-corte-cdp" />
+              <button class="btn" type="button" data-module="cdp">Subir Apropiación</button>
               <div class="upload-status" id="status-cdp-upload"></div>
             </div>
             <div class="upload-card">
-              <div class="upload-title">CRP</div>
+              <div class="upload-title">Ejecución</div>
               <div class="upload-desc">Sube el archivo de certificados de registro presupuestal.</div>
               <input class="upload-input" type="file" id="file-crp" accept=".xlsx,.xls" />
-              <button class="btn" type="button" data-module="crp">Subir CRP</button>
+              <input class="upload-input" type="date" id="fecha-corte-crp" />
+              <button class="btn" type="button" data-module="crp">Subir Ejecución</button>
               <div class="upload-status" id="status-crp-upload"></div>
             </div>
             <div class="upload-card">
               <div class="upload-title">EJE</div>
               <div class="upload-desc">Sube el archivo de ejecución presupuestal (EJE).</div>
               <input class="upload-input" type="file" id="file-eje" accept=".xlsx,.xls" />
+              <input class="upload-input" type="date" id="fecha-corte-eje" />
               <button class="btn" type="button" data-module="eje">Subir EJE</button>
               <div class="upload-status" id="status-eje-upload"></div>
             </div>
+          </div>
+          <div style="margin-top:12px; display:flex; justify-content:flex-end;">
+            <button class="btn" type="button" id="upload-all">Subir todos</button>
           </div>
         </div>
       </section>
@@ -295,12 +476,124 @@
   <script>
     const API_BASE = 'http://127.0.0.1:8000';
     let ejeChart = null;
+    let ejeDataCache = [];
+    let cdpDataCache = [];
+    let crpDataCache = [];
+    let cdpFilteredDataCache = [];
+    let crpFilteredDataCache = [];
+    let cdpCurrentPage = 1;
+    let crpCurrentPage = 1;
+    const DETAIL_PAGE_SIZE = 20;
+    let selectedCentroFormacion = 'all';
+    let ejeTotalApropiacion = null;
+    let cdpTotalValorActual = null;
+    let crpTotalValorActual = null;
+    let totalsChart = null;
+    const CENTRO_FORMACION_OPTIONS = [
+      { code: 'all', label: 'Todos los centros' },
+      { code: '1010', label: 'Dirección Regional' },
+      { code: '9308', label: 'Centro de Comercio y Servicios' },
+      { code: '9121', label: 'Centro Atención Sector Agropecuario' },
+      { code: '9223', label: 'Centro de Diseño e Innovación Tecnológica' },
+    ];
+    const EJE_NUMERIC_FIELDS = [
+      'apropiacion_vigente_dep_gsto',
+      'total_cdp_dep_gstos',
+      'apropiacion_disponible_dep_gsto',
+      'total_cdp_modificacion_dep_gstos',
+      'total_compromiso_dep_gstos',
+      'cdp_por_comprometer_dep_gstos',
+      'total_obligaciones_dep_gstos',
+      'compromiso_por_obligar_dep_gstos',
+      'total_ordenes_pago_dep_gstos',
+      'obligaciones_por_ordenar_dep_gstos',
+      'pagos_dep_gstos',
+      'ordenes_pago_por_pagar_dep_gstos',
+      'total_reintegros_dep_gstos',
+    ];
 
     function formatMoney(value) {
       if (value === null || value === undefined || isNaN(value)) return '0';
       return Number(value).toLocaleString('es-CO', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
+      });
+    }
+
+    function parseLocalDateFromISO(dateStr) {
+      if (!dateStr) return null;
+      // Espera formato 'YYYY-MM-DD' y lo interpreta como fecha local (sin zona horaria)
+      const parts = String(dateStr).split('T')[0].split('-');
+      if (parts.length !== 3) return null;
+      const [y, m, d] = parts.map(Number);
+      if (!y || !m || !d) return null;
+      const dt = new Date(y, m - 1, d);
+      if (isNaN(dt)) return null;
+      return dt;
+    }
+
+    function formatDateEs(dateObj) {
+      if (!(dateObj instanceof Date) || isNaN(dateObj)) return '';
+      const d = String(dateObj.getDate()).padStart(2, '0');
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const y = dateObj.getFullYear();
+      return `${d}/${m}/${y}`;
+    }
+
+    function extractCentroCode(value) {
+      const text = (value ?? '').toString().trim();
+      const match = text.match(/^\s*(\d{4})/);
+      return match ? match[1] : '';
+    }
+
+    function getCentroFormacionLabel(code) {
+      const option = CENTRO_FORMACION_OPTIONS.find(item => item.code === code);
+      return option ? option.label : '';
+    }
+
+    function getCentroFormacionFromText(value) {
+      const code = extractCentroCode(value);
+      return getCentroFormacionLabel(code) || 'Otros';
+    }
+
+    function matchesSelectedCentro(row, moduleName) {
+      if (selectedCentroFormacion === 'all') return true;
+      const sourceValue = moduleName === 'eje'
+        ? row.dependecia_de_afectacion_de_gastos
+        : row.dependencia;
+      return extractCentroCode(sourceValue) === selectedCentroFormacion;
+    }
+
+    function filterBySelectedCentro(rows, moduleName) {
+      return (rows || []).filter(row => matchesSelectedCentro(row, moduleName));
+    }
+
+    function buildEjeTotals(rows) {
+      const totals = {};
+      EJE_NUMERIC_FIELDS.forEach(field => { totals[field] = 0; });
+
+      rows.forEach(row => {
+        EJE_NUMERIC_FIELDS.forEach(field => {
+          totals[field] += Number(row[field]) || 0;
+        });
+      });
+
+      return totals;
+    }
+
+    function setupCentroFormacionFilter() {
+      const select = document.getElementById('centro-formacion-filter');
+      if (!select) return;
+
+      select.innerHTML = CENTRO_FORMACION_OPTIONS.map(option => `
+        <option value="${option.code}">${option.label}</option>
+      `).join('');
+
+      select.value = selectedCentroFormacion;
+      select.addEventListener('change', () => {
+        selectedCentroFormacion = select.value || 'all';
+        loadCdpCrpSummary();
+        loadEjeSummary();
       });
     }
 
@@ -333,39 +626,31 @@
         const res = await fetch(`${API_BASE}/eje/`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
+        const filteredData = filterBySelectedCentro(Array.isArray(data) ? data : [], 'eje');
 
-        const totalRows = data.length;
-        const resumenRows = data.filter(r => r.es_resumen === true || r.es_resumen === 1);
+        const totalRows = filteredData.length;
+        const resumenRows = filteredData.filter(r => r.es_resumen === true || r.es_resumen === 1);
 
-        // Sumar todos los campos numéricos de contabilidad que van después de es_resumen
-        const numericFields = [
-          'apropiacion_vigente_dep_gsto',
-          'total_cdp_dep_gstos',
-          'apropiacion_disponible_dep_gsto',
-          'total_cdp_modificacion_dep_gstos',
-          'total_compromiso_dep_gstos',
-          'cdp_por_comprometer_dep_gstos',
-          'total_obligaciones_dep_gstos',
-          'compromiso_por_obligar_dep_gstos',
-          'total_ordenes_pago_dep_gstos',
-          'obligaciones_por_ordenar_dep_gstos',
-          'pagos_dep_gstos',
-          'ordenes_pago_por_pagar_dep_gstos',
-          'total_reintegros_dep_gstos',
-        ];
-
-        const totals = {};
-        numericFields.forEach(field => { totals[field] = 0; });
-
-        resumenRows.forEach(row => {
-          numericFields.forEach(field => {
-            totals[field] += Number(row[field]) || 0;
-          });
-        });
+        const totals = buildEjeTotals(resumenRows);
 
         const totalApropiacion = totals.apropiacion_vigente_dep_gsto || 0;
 
         mainMetricEl.textContent = '$ ' + formatMoney(totalApropiacion);
+        const resumenEjeTotalEl = document.getElementById('resumen-eje-total');
+        if (resumenEjeTotalEl) {
+          resumenEjeTotalEl.textContent = '$ ' + formatMoney(totalApropiacion);
+        }
+        const resumenEjeFechaCorteEl = document.getElementById('resumen-eje-fecha-corte');
+        if (resumenEjeFechaCorteEl) {
+          const ejeCutoff = filteredData.reduce((acc, row) => {
+            const d = parseLocalDateFromISO(row.fecha_corte);
+            if (!d) return acc;
+            return !acc || d > acc ? d : acc;
+          }, null);
+          resumenEjeFechaCorteEl.textContent = ejeCutoff ? formatDateEs(ejeCutoff) : '—';
+        }
+        ejeTotalApropiacion = totalApropiacion;
+        renderTotalsComparisonChart();
         totalRowsEl.textContent = totalRows.toString();
         resumenRowsEl.textContent = resumenRows.length.toString();
 
@@ -407,9 +692,425 @@
         setupEjePivot(resumenRows);
       } catch (err) {
         mainMetricEl.textContent = '—';
+        const resumenEjeTotalEl = document.getElementById('resumen-eje-total');
+        if (resumenEjeTotalEl) {
+          resumenEjeTotalEl.textContent = 'Error';
+        }
         errorEl.style.display = 'block';
         errorEl.textContent = 'Error cargando datos de /eje: ' + err.message;
       }
+    }
+
+    async function loadCdpCrpSummary() {
+      const cdpTotalEl = document.getElementById('resumen-cdp-total');
+      const crpTotalEl = document.getElementById('resumen-crp-total');
+      if (!cdpTotalEl || !crpTotalEl) return;
+
+      cdpTotalEl.textContent = 'Cargando...';
+      crpTotalEl.textContent = 'Cargando...';
+
+      try {
+        const [resCdp, resCrp] = await Promise.all([
+          fetch(`${API_BASE}/cdp/`),
+          fetch(`${API_BASE}/crp/`),
+        ]);
+
+        if (!resCdp.ok || !resCrp.ok) {
+          throw new Error('Error obteniendo datos de Apropiación/Ejecución');
+        }
+
+        const [cdpData, crpData] = await Promise.all([
+          resCdp.json(),
+          resCrp.json(),
+        ]);
+
+        cdpDataCache = filterBySelectedCentro(Array.isArray(cdpData) ? cdpData : [], 'cdp');
+        crpDataCache = filterBySelectedCentro(Array.isArray(crpData) ? crpData : [], 'crp');
+
+        const cdpFiltered = cdpDataCache;
+        const crpFiltered = crpDataCache;
+
+        const cdpTotal = cdpFiltered.reduce((acc, row) => {
+          return acc + (Number(row.valor_actual) || 0);
+        }, 0);
+
+        const crpTotalResumen = crpFiltered.reduce((acc, row) => {
+          return acc + (Number(row.valor_inicial) || 0);
+        }, 0);
+
+        const crpTotalActual = crpFiltered.reduce((acc, row) => {
+          return acc + (Number(row.valor_actual) || 0);
+        }, 0);
+
+        cdpTotalEl.textContent = '$ ' + formatMoney(cdpTotal);
+        crpTotalEl.textContent = '$ ' + formatMoney(crpTotalResumen);
+
+        const cdpFechaEl = document.getElementById('resumen-cdp-fecha-corte');
+        const crpFechaEl = document.getElementById('resumen-crp-fecha-corte');
+        if (cdpFechaEl) {
+          const cdpCutoff = cdpFiltered.reduce((acc, row) => {
+            const d = parseLocalDateFromISO(row.fecha_corte);
+            if (!d) return acc;
+            return !acc || d > acc ? d : acc;
+          }, null);
+          cdpFechaEl.textContent = cdpCutoff ? formatDateEs(cdpCutoff) : '—';
+        }
+        if (crpFechaEl) {
+          const crpCutoff = crpFiltered.reduce((acc, row) => {
+            const d = parseLocalDateFromISO(row.fecha_corte);
+            if (!d) return acc;
+            return !acc || d > acc ? d : acc;
+          }, null);
+          crpFechaEl.textContent = crpCutoff ? formatDateEs(crpCutoff) : '—';
+        }
+
+        cdpTotalValorActual = cdpTotal;
+        crpTotalValorActual = crpTotalActual;
+        renderTotalsComparisonChart();
+        setupCdpFilters();
+        setupCrpFilters();
+      } catch (err) {
+        cdpTotalEl.textContent = 'Error';
+        crpTotalEl.textContent = 'Error';
+      }
+    }
+
+    function renderCdpTable() {
+      const body = document.getElementById('cdp-table-body');
+      if (!body) return;
+      body.innerHTML = '';
+      const infoEl = document.getElementById('cdp-page-info');
+      const curEl = document.getElementById('cdp-page-current');
+      const prevBtn = document.getElementById('cdp-page-prev');
+      const nextBtn = document.getElementById('cdp-page-next');
+      const summaryEl = document.getElementById('cdp-table-summary');
+
+      const dataSource = cdpFilteredDataCache;
+      const total = dataSource.length;
+      const pageSize = DETAIL_PAGE_SIZE;
+      const totalPages = total > 0 ? Math.max(1, Math.ceil(total / pageSize)) : 1;
+      if (cdpCurrentPage > totalPages) cdpCurrentPage = totalPages;
+
+      const startIdx = (cdpCurrentPage - 1) * pageSize;
+      const endIdx = startIdx + pageSize;
+      const pageRows = dataSource.slice(startIdx, endIdx);
+
+      const totalValorActual = dataSource.reduce((acc, row) => acc + (Number(row.valor_actual) || 0), 0);
+      if (summaryEl) {
+        summaryEl.textContent = `Coinciden con filtros: ${total}. Sumatoria valor actual: $ ${formatMoney(totalValorActual)}.`;
+      }
+
+      pageRows.forEach(row => {
+        const div = document.createElement('div');
+        div.className = 'data-table-row data-table-row-5';
+        const dep = row.dependencia || '';
+        const depDesc = row.dependencia_descripcion || '';
+        const depFull = depDesc ? `${dep} - ${depDesc}` : dep;
+        div.innerHTML = `
+          <span>${row.numero_documento != null ? row.numero_documento : ''}</span>
+          <span>${row.tipo_cdp || ''}</span>
+          <span title="${depFull}">${depFull.slice(0, 40)}${depFull.length > 40 ? '…' : ''}</span>
+          <span>${row.rubro || ''}</span>
+          <span>$ ${formatMoney(row.valor_actual)}</span>
+        `;
+        body.appendChild(div);
+      });
+
+      if (infoEl && curEl && prevBtn && nextBtn) {
+        if (total === 0) {
+          infoEl.textContent = 'Sin resultados.';
+          curEl.textContent = '';
+          prevBtn.disabled = true;
+          nextBtn.disabled = true;
+        } else {
+          const startHuman = startIdx + 1;
+          const endHuman = Math.min(endIdx, total);
+          infoEl.textContent = `Mostrando ${startHuman}-${endHuman} de ${total} filas`;
+          curEl.textContent = `Página ${cdpCurrentPage} de ${totalPages}`;
+          prevBtn.disabled = cdpCurrentPage === 1;
+          nextBtn.disabled = cdpCurrentPage === totalPages;
+        }
+      }
+    }
+
+    function renderCrpTable() {
+      const body = document.getElementById('crp-table-body');
+      if (!body) return;
+      body.innerHTML = '';
+      const infoEl = document.getElementById('crp-page-info');
+      const curEl = document.getElementById('crp-page-current');
+      const prevBtn = document.getElementById('crp-page-prev');
+      const nextBtn = document.getElementById('crp-page-next');
+      const summaryEl = document.getElementById('crp-table-summary');
+
+      const dataSource = crpFilteredDataCache;
+      const total = dataSource.length;
+      const pageSize = DETAIL_PAGE_SIZE;
+      const totalPages = total > 0 ? Math.max(1, Math.ceil(total / pageSize)) : 1;
+      if (crpCurrentPage > totalPages) crpCurrentPage = totalPages;
+
+      const startIdx = (crpCurrentPage - 1) * pageSize;
+      const endIdx = startIdx + pageSize;
+      const pageRows = dataSource.slice(startIdx, endIdx);
+
+      const totalValorActual = dataSource.reduce((acc, row) => acc + (Number(row.valor_actual) || 0), 0);
+      if (summaryEl) {
+        summaryEl.textContent = `Coinciden con filtros: ${total}. Sumatoria valor actual: $ ${formatMoney(totalValorActual)}.`;
+      }
+
+      pageRows.forEach(row => {
+        const div = document.createElement('div');
+        div.className = 'data-table-row data-table-row-5';
+        const dep = row.dependencia || '';
+        const depDesc = row.dependencia_descripcion || '';
+        const depFull = depDesc ? `${dep} - ${depDesc}` : dep;
+        div.innerHTML = `
+          <span>${row.numero_documento != null ? row.numero_documento : ''}</span>
+          <span title="${depFull}">${depFull.slice(0, 40)}${depFull.length > 40 ? '…' : ''}</span>
+          <span>${row.rubro || ''}</span>
+          <span>$ ${formatMoney(row.valor_actual)}</span>
+          <span>${row.cdp != null ? row.cdp : ''}</span>
+        `;
+        body.appendChild(div);
+      });
+
+      if (infoEl && curEl && prevBtn && nextBtn) {
+        if (total === 0) {
+          infoEl.textContent = 'Sin resultados.';
+          curEl.textContent = '';
+          prevBtn.disabled = true;
+          nextBtn.disabled = true;
+        } else {
+          const startHuman = startIdx + 1;
+          const endHuman = Math.min(endIdx, total);
+          infoEl.textContent = `Mostrando ${startHuman}-${endHuman} de ${total} filas`;
+          curEl.textContent = `Página ${crpCurrentPage} de ${totalPages}`;
+          prevBtn.disabled = crpCurrentPage === 1;
+          nextBtn.disabled = crpCurrentPage === totalPages;
+        }
+      }
+    }
+
+    function setupDetailPagination() {
+      const cdpPrev = document.getElementById('cdp-page-prev');
+      const cdpNext = document.getElementById('cdp-page-next');
+      if (cdpPrev && cdpNext) {
+        cdpPrev.addEventListener('click', () => {
+          if (cdpCurrentPage > 1) {
+            cdpCurrentPage -= 1;
+            renderCdpTable();
+          }
+        });
+        cdpNext.addEventListener('click', () => {
+          const totalPages = cdpFilteredDataCache.length > 0 ? Math.max(1, Math.ceil(cdpFilteredDataCache.length / DETAIL_PAGE_SIZE)) : 1;
+          if (cdpCurrentPage < totalPages) {
+            cdpCurrentPage += 1;
+            renderCdpTable();
+          }
+        });
+      }
+
+      const crpPrev = document.getElementById('crp-page-prev');
+      const crpNext = document.getElementById('crp-page-next');
+      if (crpPrev && crpNext) {
+        crpPrev.addEventListener('click', () => {
+          if (crpCurrentPage > 1) {
+            crpCurrentPage -= 1;
+            renderCrpTable();
+          }
+        });
+        crpNext.addEventListener('click', () => {
+          const totalPages = crpFilteredDataCache.length > 0 ? Math.max(1, Math.ceil(crpFilteredDataCache.length / DETAIL_PAGE_SIZE)) : 1;
+          if (crpCurrentPage < totalPages) {
+            crpCurrentPage += 1;
+            renderCrpTable();
+          }
+        });
+      }
+    }
+
+    function setupCdpFilters() {
+      const depContainer = document.getElementById('cdp-filter-dependencia');
+      const rubroContainer = document.getElementById('cdp-filter-rubro');
+      const numeroContainer = document.getElementById('cdp-filter-numero');
+      const searchInput = document.getElementById('cdp-search-input');
+      if (!depContainer || !rubroContainer || !numeroContainer || !searchInput) return;
+
+      const deps = Array.from(new Set(
+        cdpDataCache
+          .map(r => {
+            const dep = r.dependencia || '';
+            const depDesc = r.dependencia_descripcion || '';
+            return depDesc ? `${dep} - ${depDesc}` : dep;
+          })
+          .filter(Boolean)
+      )).sort((a, b) => a.localeCompare(b, 'es'));
+
+      const rubros = Array.from(new Set(
+        cdpDataCache.map(r => r.rubro || '').filter(Boolean)
+      )).sort((a, b) => a.localeCompare(b, 'es'));
+
+      const numeros = Array.from(new Set(
+        cdpDataCache
+          .map(r => r.numero_documento)
+          .filter(v => v !== null && v !== undefined && String(v).trim() !== '')
+          .map(v => String(v).trim())
+      )).sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
+
+      buildFilterDropdown(depContainer, 'Todas las dependencias', deps);
+      buildFilterDropdown(rubroContainer, 'Todos los rubros', rubros);
+      buildFilterDropdownWithSearch(numeroContainer, 'Todos los CDP', numeros, 'Buscar CDP...');
+
+      let searchTerm = '';
+
+      function getCheckedValues(container) {
+        return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(i => i.value);
+      }
+
+      function applyFilters() {
+        const selDeps = new Set(getCheckedValues(depContainer));
+        const selRubros = new Set(getCheckedValues(rubroContainer));
+        const selNumeros = new Set(getCheckedValues(numeroContainer));
+        cdpFilteredDataCache = cdpDataCache.filter(row => {
+          const dep = row.dependencia || '';
+          const depDesc = row.dependencia_descripcion || '';
+          const depFull = depDesc ? `${dep} - ${depDesc}` : dep;
+          const rubro = row.rubro || '';
+          const numeroDocumento = row.numero_documento !== null && row.numero_documento !== undefined
+            ? String(row.numero_documento)
+            : '';
+
+          if (selDeps.size && !selDeps.has(depFull)) return false;
+          if (selRubros.size && !selRubros.has(rubro)) return false;
+          if (selNumeros.size && !selNumeros.has(numeroDocumento)) return false;
+
+          if (searchTerm) {
+            const haystack = [
+              row.numero_documento,
+              row.tipo_cdp,
+              dep,
+              depDesc,
+              rubro,
+              row.descripcion,
+            ]
+              .map(v => (v || '').toString().toLowerCase())
+              .join(' ');
+            if (!haystack.includes(searchTerm)) return false;
+          }
+
+          return true;
+        });
+
+        cdpCurrentPage = 1;
+        renderCdpTable();
+      }
+
+      const depPanel = depContainer.querySelector('.filter-panel');
+      const rubroPanel = rubroContainer.querySelector('.filter-panel');
+      const numeroPanel = numeroContainer.querySelector('.filter-panel');
+      if (depPanel) depPanel.addEventListener('change', applyFilters);
+      if (rubroPanel) rubroPanel.addEventListener('change', applyFilters);
+      if (numeroPanel) numeroPanel.addEventListener('change', applyFilters);
+
+      searchInput.addEventListener('input', (e) => {
+        searchTerm = (e.target.value || '').toString().trim().toLowerCase();
+        applyFilters();
+      });
+
+      cdpFilteredDataCache = cdpDataCache.slice();
+      applyFilters();
+    }
+
+    function setupCrpFilters() {
+      const depContainer = document.getElementById('crp-filter-dependencia');
+      const rubroContainer = document.getElementById('crp-filter-rubro');
+      const cdpContainer = document.getElementById('crp-filter-cdp');
+      const searchInput = document.getElementById('crp-search-input');
+      if (!depContainer || !rubroContainer || !cdpContainer || !searchInput) return;
+
+      const deps = Array.from(new Set(
+        crpDataCache
+          .map(r => {
+            const dep = r.dependencia || '';
+            const depDesc = r.dependencia_descripcion || '';
+            return depDesc ? `${dep} - ${depDesc}` : dep;
+          })
+          .filter(Boolean)
+      )).sort((a, b) => a.localeCompare(b, 'es'));
+
+      const rubros = Array.from(new Set(
+        crpDataCache.map(r => r.rubro || '').filter(Boolean)
+      )).sort((a, b) => a.localeCompare(b, 'es'));
+
+      const cdps = Array.from(new Set(
+        crpDataCache
+          .map(r => r.cdp)
+          .filter(v => v !== null && v !== undefined && String(v).trim() !== '')
+          .map(v => String(v).trim())
+      )).sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
+
+      buildFilterDropdown(depContainer, 'Todas las dependencias', deps);
+      buildFilterDropdown(rubroContainer, 'Todos los rubros', rubros);
+      buildFilterDropdownWithSearch(cdpContainer, 'Todos los CDP', cdps, 'Buscar CDP...');
+
+      let searchTerm = '';
+
+      function getCheckedValues(container) {
+        return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(i => i.value);
+      }
+
+      function applyFilters() {
+        const selDeps = new Set(getCheckedValues(depContainer));
+        const selRubros = new Set(getCheckedValues(rubroContainer));
+        const selCdps = new Set(getCheckedValues(cdpContainer));
+        crpFilteredDataCache = crpDataCache.filter(row => {
+          const dep = row.dependencia || '';
+          const depDesc = row.dependencia_descripcion || '';
+          const depFull = depDesc ? `${dep} - ${depDesc}` : dep;
+          const rubro = row.rubro || '';
+          const cdp = row.cdp !== null && row.cdp !== undefined
+            ? String(row.cdp)
+            : '';
+
+          if (selDeps.size && !selDeps.has(depFull)) return false;
+          if (selRubros.size && !selRubros.has(rubro)) return false;
+          if (selCdps.size && !selCdps.has(cdp)) return false;
+
+          if (searchTerm) {
+            const haystack = [
+              row.numero_documento,
+              dep,
+              depDesc,
+              rubro,
+              row.cdp,
+              row.descripcion,
+            ]
+              .map(v => (v || '').toString().toLowerCase())
+              .join(' ');
+            if (!haystack.includes(searchTerm)) return false;
+          }
+
+          return true;
+        });
+
+        crpCurrentPage = 1;
+        renderCrpTable();
+      }
+
+      const depPanel = depContainer.querySelector('.filter-panel');
+      const rubroPanel = rubroContainer.querySelector('.filter-panel');
+      const cdpPanel = cdpContainer.querySelector('.filter-panel');
+      if (depPanel) depPanel.addEventListener('change', applyFilters);
+      if (rubroPanel) rubroPanel.addEventListener('change', applyFilters);
+      if (cdpPanel) cdpPanel.addEventListener('change', applyFilters);
+
+      searchInput.addEventListener('input', (e) => {
+        searchTerm = (e.target.value || '').toString().trim().toLowerCase();
+        applyFilters();
+      });
+
+      crpFilteredDataCache = crpDataCache.slice();
+      applyFilters();
     }
 
     function buildRubroCodigo(row) {
@@ -436,6 +1137,7 @@
       const depContainer = document.getElementById('filter-dependencia');
       const rubroContainer = document.getElementById('filter-rubro');
       const recursoContainer = document.getElementById('filter-recurso');
+      const searchInput = document.getElementById('eje-search-input');
       const bodyEl = document.getElementById('eje-pivot-body');
       const summaryEl = document.getElementById('eje-pivot-summary');
       const paginationEl = document.getElementById('eje-pivot-pagination');
@@ -448,8 +1150,9 @@
       if (!depContainer || !rubroContainer || !recursoContainer || !bodyEl || !summaryEl || !paginationEl) return;
 
       let currentPage = 1;
-      const pageSize = 30;
+      const pageSize = DETAIL_PAGE_SIZE;
       let currentFiltered = resumenRows.slice();
+      let searchTerm = '';
 
       const deps = Array.from(new Set(
         resumenRows.map(r => r.dependecia_de_afectacion_de_gastos || '').filter(Boolean)
@@ -491,13 +1194,14 @@
 
         pageRows.forEach(row => {
           const div = document.createElement('div');
-          div.className = 'data-table-row';
+          div.className = 'data-table-row data-table-row-eje';
           div.innerHTML = `
             <span title="${row.dependecia_de_afectacion_de_gastos || ''}">
               ${(row.dependecia_de_afectacion_de_gastos || '').slice(0, 40)}${(row.dependecia_de_afectacion_de_gastos || '').length > 40 ? '…' : ''}
             </span>
             <span title="${row.concepto || ''}">${buildRubroCodigo(row) || '-'}</span>
             <span>${row.recurso || ''}</span>
+            <span>${row.rec ?? ''}</span>
             <span>$ ${formatMoney(row.apropiacion_vigente_dep_gsto)}</span>
           `;
           bodyEl.appendChild(div);
@@ -528,15 +1232,27 @@
           const rubro = buildRubroCodigo(row);
           if (selRubros.size && !selRubros.has(rubro)) return false;
           if (selRecursos.size && !selRecursos.has(row.recurso || '')) return false;
+          if (searchTerm) {
+            const haystack = [
+              row.dependecia_de_afectacion_de_gastos,
+              row.concepto,
+              rubro,
+              row.recurso,
+            ]
+              .map(v => (v || '').toString().toLowerCase())
+              .join(' ');
+            if (!haystack.includes(searchTerm)) return false;
+          }
           return true;
         });
         currentPage = 1;
         renderTable();
 
-        const totalApropiacion = currentFiltered.reduce(
-          (acc, row) => acc + (Number(row.apropiacion_vigente_dep_gsto) || 0),
-          0
-        );
+        const filteredTotals = buildEjeTotals(currentFiltered);
+        const totalApropiacion = filteredTotals.apropiacion_vigente_dep_gsto || 0;
+
+        // Mantener el gráfico alineado con los filtros activos de la tabla EJE.
+        renderEjeChart(filteredTotals);
 
         summaryEl.textContent = `Filas resumen: ${resumenRows.length}. Coinciden con filtros: ${currentFiltered.length}. Total apropiación: $ ${formatMoney(totalApropiacion)}.`;
       }
@@ -547,6 +1263,13 @@
       if (depPanel) depPanel.addEventListener('change', applyFilters);
       if (rubroPanel) rubroPanel.addEventListener('change', applyFilters);
       if (recursoPanel) recursoPanel.addEventListener('change', applyFilters);
+
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          searchTerm = (e.target.value || '').toString().trim().toLowerCase();
+          applyFilters();
+        });
+      }
 
       applyFilters();
 
@@ -582,8 +1305,7 @@
             { key: 'concepto', header: 'Concepto' },
             { key: 'fuente', header: 'Fuente' },
             { key: 'situacion', header: 'Situación' },
-            { key: 'rec', header: 'Rec' },
-            { key: 'es_resumen', header: 'Es resumen' },
+            { key: 'rec', header: 'SIIF' },
             { key: 'apropiacion_vigente_dep_gsto', header: 'Apropiación vigente dep. gastos' },
             { key: 'total_cdp_dep_gstos', header: 'Total CDP dep. gastos' },
             { key: 'apropiacion_disponible_dep_gsto', header: 'Apropiación disponible dep. gastos' },
@@ -646,9 +1368,6 @@
               if (c.key === 'rubro') {
                 return buildRubroCodigo(row) || '';
               }
-              if (c.key === 'es_resumen') {
-                return row.es_resumen ? 1 : 0;
-              }
               const v = row[c.key];
               if (v === null || v === undefined) return '';
               return v;
@@ -686,7 +1405,6 @@
             12, // Fuente
             12, // Situación
             6,  // Rec
-            10, // Es resumen
             22, // Apropiación vigente
             22, // Total CDP
             24, // Apropiación disponible
@@ -776,6 +1494,78 @@
       updateLabel();
     }
 
+    function buildFilterDropdownWithSearch(container, placeholder, values, searchPlaceholder) {
+      if (!container) return;
+      const id = container.id || '';
+      container.innerHTML = `
+        <button type="button" class="filter-toggle">
+          <span class="filter-toggle-label">${placeholder}</span>
+          <span class="filter-toggle-icon">▼</span>
+        </button>
+        <div class="filter-panel">
+          <input type="text" class="filter-text" placeholder="${searchPlaceholder}" style="margin-bottom:6px;" />
+          <div class="filter-options"></div>
+        </div>
+      `;
+
+      const panel = container.querySelector('.filter-panel');
+      const searchInput = panel.querySelector('.filter-text');
+      const optionsHost = panel.querySelector('.filter-options');
+      const labelSpan = container.querySelector('.filter-toggle-label');
+
+      const options = values.map(v => ({
+        value: v,
+        id: `${id}-${CSS.escape(v)}`,
+        checked: false,
+      }));
+
+      function renderOptions(term = '') {
+        const q = term.toLowerCase();
+        const filtered = options.filter(opt => opt.value.toLowerCase().includes(q));
+        optionsHost.innerHTML = filtered.map(opt => `
+          <div class="filter-option">
+            <input type="checkbox" id="${opt.id}" value="${opt.value}" ${opt.checked ? 'checked' : ''}>
+            <label for="${opt.id}">${opt.value}</label>
+          </div>
+        `).join('');
+      }
+
+      function updateLabel() {
+        const selected = options.filter(opt => opt.checked);
+        if (!selected.length) {
+          labelSpan.textContent = placeholder;
+        } else if (selected.length === 1) {
+          labelSpan.textContent = selected[0].value;
+        } else {
+          labelSpan.textContent = `${selected.length} seleccionados`;
+        }
+      }
+
+      renderOptions();
+      updateLabel();
+
+      container.querySelector('.filter-toggle').addEventListener('click', () => {
+        const isOpen = container.classList.contains('open');
+        document.querySelectorAll('.filter-dropdown.open').forEach(el => {
+          if (el !== container) el.classList.remove('open');
+        });
+        container.classList.toggle('open', !isOpen);
+      });
+
+      searchInput.addEventListener('input', () => {
+        renderOptions(searchInput.value || '');
+      });
+
+      panel.addEventListener('change', (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLInputElement) || target.type !== 'checkbox') return;
+        const opt = options.find(o => o.value === target.value);
+        if (opt) opt.checked = target.checked;
+        updateLabel();
+        panel.dispatchEvent(new Event('filters-changed', { bubbles: true }));
+      });
+    }
+
     function setupNav() {
       const btnDashboard = document.getElementById('nav-dashboard');
       const btnUpload = document.getElementById('nav-upload');
@@ -797,12 +1587,33 @@
       });
     }
 
+    function setupTableTabs() {
+      const buttons = document.querySelectorAll('.tab-btn[data-table]');
+      const containers = {
+        eje: document.getElementById('table-eje-container'),
+        cdp: document.getElementById('table-cdp-container'),
+        crp: document.getElementById('table-crp-container'),
+      };
+
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.getAttribute('data-table');
+          buttons.forEach(b => b.classList.toggle('active', b === btn));
+          Object.entries(containers).forEach(([key, el]) => {
+            if (!el) return;
+            el.style.display = key === target ? '' : 'none';
+          });
+        });
+      });
+    }
+
     function setupUploads() {
       const modules = ['cdp', 'crp', 'eje'];
       modules.forEach(mod => {
         const btn = document.querySelector(`.btn[data-module="${mod}"]`);
         const input = document.getElementById(`file-${mod}`);
         const statusEl = document.getElementById(`status-${mod}-upload`);
+        const cutoffInput = document.getElementById(`fecha-corte-${mod}`);
         if (!btn || !input || !statusEl) return;
 
         btn.addEventListener('click', async () => {
@@ -815,6 +1626,9 @@
 
           const formData = new FormData();
           formData.append('file', file);
+          if (cutoffInput && cutoffInput.value) {
+            formData.append('fecha_corte', cutoffInput.value);
+          }
 
           try {
             const res = await fetch(`${API_BASE}/${mod}/upload`, {
@@ -830,20 +1644,44 @@
             statusEl.textContent = 'Archivo subido correctamente' + inserted + '.';
 
             // Refrescar el dashboard en tiempo real después de una carga exitosa
+            loadCdpCrpSummary();
             loadEjeSummary();
           } catch (err) {
             statusEl.textContent = 'Error al subir: ' + err.message;
           }
         });
       });
+
+      const btnAll = document.getElementById('upload-all');
+      if (btnAll) {
+        btnAll.addEventListener('click', () => {
+          modules.forEach(mod => {
+            const input = document.getElementById(`file-${mod}`);
+            const btn = document.querySelector(`.btn[data-module="${mod}"]`);
+            if (input && input.files && input.files.length > 0 && btn) {
+              btn.click();
+            }
+          });
+        });
+      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       setupNav();
+      setupTableTabs();
+      setupDetailPagination();
       setupUploads();
+      setupCentroFormacionFilter();
+      const typeSelect = document.getElementById('totals-chart-type');
+      if (typeSelect) {
+        typeSelect.addEventListener('change', () => {
+          renderTotalsComparisonChart();
+        });
+      }
       pingEndpoint('/eje/', document.getElementById('status-eje'));
       pingEndpoint('/cdp/', document.getElementById('status-cdp'));
       pingEndpoint('/crp/', document.getElementById('status-crp'));
+      loadCdpCrpSummary();
       loadEjeSummary();
     });
 
@@ -855,11 +1693,11 @@
 
       const fields = [
         { key: 'apropiacion_vigente_dep_gsto', label: 'Apropiación vigente dep. gastos' },
-        { key: 'total_cdp_dep_gstos', label: 'Total CDP dep. gastos' },
+        { key: 'total_cdp_dep_gstos', label: 'Total Apropiación dep. gastos' },
         { key: 'apropiacion_disponible_dep_gsto', label: 'Apropiación disponible dep. gastos' },
-        { key: 'total_cdp_modificacion_dep_gstos', label: 'Total CDP modif. dep. gastos' },
+        { key: 'total_cdp_modificacion_dep_gstos', label: 'Total Apropiación modif. dep. gastos' },
         { key: 'total_compromiso_dep_gstos', label: 'Total compromiso dep. gastos' },
-        { key: 'cdp_por_comprometer_dep_gstos', label: 'CDP por comprometer dep. gastos' },
+        { key: 'cdp_por_comprometer_dep_gstos', label: 'Apropiación por comprometer dep. gastos' },
         { key: 'total_obligaciones_dep_gstos', label: 'Total obligaciones dep. gastos' },
         { key: 'compromiso_por_obligar_dep_gstos', label: 'Compromiso por obligar dep. gastos' },
         { key: 'total_ordenes_pago_dep_gstos', label: 'Total órdenes de pago dep. gastos' },
@@ -918,6 +1756,69 @@
               },
             },
           },
+        },
+      });
+    }
+
+    function renderTotalsComparisonChart() {
+      const canvas = document.getElementById('totals-chart');
+      if (!canvas || !window.Chart) return;
+      if (ejeTotalApropiacion == null || cdpTotalValorActual == null || crpTotalValorActual == null) return;
+
+      const ctx = canvas.getContext('2d');
+
+      const labels = [
+        'EJE - Apropiación vigente',
+        'Apropiación - Valor actual',
+        'Ejecución - Valor actual',
+      ];
+      const rawData = [
+        Number(ejeTotalApropiacion) || 0,
+        Number(cdpTotalValorActual) || 0,
+        Number(crpTotalValorActual) || 0,
+      ];
+      const data = rawData.map(v => Number(v.toFixed(2)));
+
+      const typeSelect = document.getElementById('totals-chart-type');
+      const chartType = typeSelect && typeSelect.value ? typeSelect.value : 'bar';
+
+      const colors = ['#009639', '#0ea5e9', '#f97316'];
+
+      if (totalsChart) {
+        totalsChart.destroy();
+      }
+
+      totalsChart = new Chart(ctx, {
+        type: chartType,
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Total (COP)',
+              data,
+              backgroundColor: colors,
+              borderColor: colors,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: chartType !== 'bar' ? true : false },
+            tooltip: {
+              callbacks: {
+                label: (context) => ' $ ' + formatMoney(context.parsed.y || context.parsed || 0),
+              },
+            },
+          },
+          scales: chartType === 'bar' || chartType === 'line' ? {
+            y: {
+              ticks: {
+                callback: (value) => formatMoney(value),
+              },
+            },
+          } : {},
         },
       });
     }

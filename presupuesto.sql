@@ -23,6 +23,7 @@ CREATE TABLE cdp (
         saldo_por_comprometer DECIMAL(18, 2),
         objeto VARCHAR(500),
         solicitud_cdp INTEGER,
+        fecha_corte DATE,
         firma VARCHAR(64)
             GENERATED ALWAYS AS (
                 SHA2(
@@ -90,6 +91,7 @@ CREATE TABLE crp (
         tipo_documento_soporte VARCHAR(100),
         numero_documento_soporte VARCHAR(100),
         observaciones TEXT,
+        fecha_corte DATE,
         firma VARCHAR(64)
             GENERATED ALWAYS AS (
                 SHA2(
@@ -167,6 +169,7 @@ CREATE TABLE eje (
         pagos_dep_gstos DECIMAL(18, 2),
         ordenes_pago_por_pagar_dep_gstos DECIMAL(18, 2),
         total_reintegros_dep_gstos DECIMAL(18, 2),
+        fecha_corte DATE,
         firma VARCHAR(64)
             GENERATED ALWAYS AS (
                 SHA2(
