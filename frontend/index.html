@@ -225,6 +225,38 @@
         </div>
       </section>
 
+      <section class="card card-full">
+        <div class="card-inner">
+          <div class="card-header">
+            <div class="card-title">Rubros destacados</div>
+          </div>
+          <div class="upload-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+            <div class="upload-card">
+              <div class="upload-title">Rubros con más dependencias</div>
+              <div class="upload-desc">Cuenta cuántas dependencias distintas tiene cada rubro en EJE.</div>
+              <div class="table" aria-label="Rubros con más dependencias">
+                <div class="table-header">
+                  <span>Rubro</span>
+                  <span>Dependencias</span>
+                </div>
+                <div id="rubros-mas-dependencias-body"></div>
+              </div>
+            </div>
+            <div class="upload-card">
+              <div class="upload-title">Rubros con más apropiación vigente</div>
+              <div class="upload-desc">Suma la apropiación vigente por rubro en filas resumen de EJE.</div>
+              <div class="table" aria-label="Rubros con más apropiación vigente">
+                <div class="table-header">
+                  <span>Rubro</span>
+                  <span>Total</span>
+                </div>
+                <div id="rubros-mas-dinero-body"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section class="card">
         <div class="card-inner">
           <div class="card-header">
@@ -556,6 +588,8 @@
     let cdpCurrentPage = 1;
     let crpCurrentPage = 1;
     let cruceCurrentPage = 1;
+    const filterSelectionState = {};
+    const filterSearchState = {};
     const DETAIL_PAGE_SIZE = 20;
     let selectedCentroFormacion = 'all';
     let ejeTotalApropiacion = null;
@@ -689,10 +723,14 @@
       const totalRowsEl = document.getElementById('eje-total-rows');
       const resumenRowsEl = document.getElementById('eje-resumen-rows');
       const previewBodyEl = document.getElementById('eje-preview-body');
+      const rubrosMasDependenciasBodyEl = document.getElementById('rubros-mas-dependencias-body');
+      const rubrosMasDineroBodyEl = document.getElementById('rubros-mas-dinero-body');
       const errorEl = document.getElementById('eje-error');
 
       errorEl.style.display = 'none';
       previewBodyEl.innerHTML = '';
+      if (rubrosMasDependenciasBodyEl) rubrosMasDependenciasBodyEl.innerHTML = '';
+      if (rubrosMasDineroBodyEl) rubrosMasDineroBodyEl.innerHTML = '';
       mainMetricEl.textContent = 'Cargando...';
 
       try {
@@ -708,6 +746,54 @@
         const totals = buildEjeTotals(resumenRows);
 
         const totalApropiacion = totals.apropiacion_vigente_dep_gsto || 0;
+        const rubroStats = new Map();
+
+        resumenRows.forEach(row => {
+          const rubro = buildRubroCodigo(row) || row.concepto || 'Sin rubro';
+          const dep = row.dependecia_de_afectacion_de_gastos || 'Sin dependencia';
+          const current = rubroStats.get(rubro) || {
+            rubro,
+            dependencias: new Set(),
+            filas: 0,
+            total: 0,
+          };
+          current.dependencias.add(dep);
+          current.filas += 1;
+          current.total += Number(row.apropiacion_vigente_dep_gsto) || 0;
+          rubroStats.set(rubro, current);
+        });
+
+        const rubrosPorDependencias = Array.from(rubroStats.values())
+          .sort((a, b) => b.dependencias.size - a.dependencias.size || b.total - a.total)
+          .slice(0, 5);
+
+        const rubrosPorDinero = Array.from(rubroStats.values())
+          .sort((a, b) => b.total - a.total || b.dependencias.size - a.dependencias.size)
+          .slice(0, 5);
+
+        if (rubrosMasDependenciasBodyEl) {
+          rubrosPorDependencias.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'table-row';
+            div.innerHTML = `
+              <span title="${item.rubro}">${item.rubro.slice(0, 42)}${item.rubro.length > 42 ? '…' : ''}</span>
+              <span>${item.dependencias.size}</span>
+            `;
+            rubrosMasDependenciasBodyEl.appendChild(div);
+          });
+        }
+
+        if (rubrosMasDineroBodyEl) {
+          rubrosPorDinero.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'table-row';
+            div.innerHTML = `
+              <span title="${item.rubro}">${item.rubro.slice(0, 42)}${item.rubro.length > 42 ? '…' : ''}</span>
+              <span>$ ${formatMoney(item.total)}</span>
+            `;
+            rubrosMasDineroBodyEl.appendChild(div);
+          });
+        }
 
         mainMetricEl.textContent = '$ ' + formatMoney(totalApropiacion);
         const resumenEjeTotalEl = document.getElementById('resumen-eje-total');
@@ -1020,17 +1106,6 @@
         return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(i => i.value);
       }
 
-      function setCheckedValues(container, selectedValues) {
-        const selected = new Set(selectedValues || []);
-        container.querySelectorAll('input[type="checkbox"]').forEach(input => {
-          input.checked = selected.has(input.value);
-        });
-        const panel = container.querySelector('.filter-panel');
-        if (panel) {
-          panel.dispatchEvent(new Event('change'));
-        }
-      }
-
       function getSelections() {
         return {
           deps: getCheckedValues(depContainer),
@@ -1099,11 +1174,6 @@
         buildFilterDropdownWithSearch(rubroContainer, 'Todos los rubros', rubroOptions, 'Buscar rubro...');
         buildFilterDropdownWithSearch(recursoContainer, 'Todos los recursos', recursoOptions, 'Buscar recurso...');
         buildFilterDropdownWithSearch(numeroContainer, 'Todos los CDP', numeroOptions, 'Buscar CDP...');
-
-        setCheckedValues(depContainer, current.deps.filter(v => depOptions.includes(v)));
-        setCheckedValues(rubroContainer, current.rubros.filter(v => rubroOptions.includes(v)));
-        setCheckedValues(recursoContainer, current.recursos.filter(v => recursoOptions.includes(v)));
-        setCheckedValues(numeroContainer, current.numeros.filter(v => numeroOptions.includes(v)));
 
         const depPanel = depContainer.querySelector('.filter-panel');
         const rubroPanel = rubroContainer.querySelector('.filter-panel');
@@ -1181,17 +1251,6 @@
         return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(i => i.value);
       }
 
-      function setCheckedValues(container, selectedValues) {
-        const selected = new Set(selectedValues || []);
-        container.querySelectorAll('input[type="checkbox"]').forEach(input => {
-          input.checked = selected.has(input.value);
-        });
-        const panel = container.querySelector('.filter-panel');
-        if (panel) {
-          panel.dispatchEvent(new Event('change'));
-        }
-      }
-
       function getSelections() {
         return {
           deps: getCheckedValues(depContainer),
@@ -1260,11 +1319,6 @@
         buildFilterDropdownWithSearch(rubroContainer, 'Todos los rubros', rubroOptions, 'Buscar rubro...');
         buildFilterDropdownWithSearch(recursoContainer, 'Todos los recursos', recursoOptions, 'Buscar recurso...');
         buildFilterDropdownWithSearch(cdpContainer, 'Todos los CDP', cdpOptions, 'Buscar CDP...');
-
-        setCheckedValues(depContainer, current.deps.filter(v => depOptions.includes(v)));
-        setCheckedValues(rubroContainer, current.rubros.filter(v => rubroOptions.includes(v)));
-        setCheckedValues(recursoContainer, current.recursos.filter(v => recursoOptions.includes(v)));
-        setCheckedValues(cdpContainer, current.cdps.filter(v => cdpOptions.includes(v)));
 
         const depPanel = depContainer.querySelector('.filter-panel');
         const rubroPanel = rubroContainer.querySelector('.filter-panel');
@@ -1369,24 +1423,71 @@
       let currentFiltered = resumenRows.slice();
       let searchTerm = '';
 
-      const deps = Array.from(new Set(
-        resumenRows.map(r => r.dependecia_de_afectacion_de_gastos || '').filter(Boolean)
-      )).sort((a, b) => a.localeCompare(b, 'es'));
-
-      const rubros = Array.from(new Set(
-        resumenRows.map(r => buildRubroCodigo(r)).filter(Boolean)
-      )).sort((a, b) => a.localeCompare(b, 'es'));
-
-      const recursos = Array.from(new Set(
-        resumenRows.map(r => r.recurso || '').filter(Boolean)
-      )).sort((a, b) => a.localeCompare(b, 'es'));
-
-      buildFilterDropdown(depContainer, 'Todas las dependencias', deps);
-      buildFilterDropdownWithSearch(rubroContainer, 'Todos los rubros', rubros, 'Buscar rubro...');
-      buildFilterDropdown(recursoContainer, 'Todos los recursos', recursos);
-
       function getCheckedValues(container) {
         return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(i => i.value);
+      }
+
+      function getSelections() {
+        return {
+          deps: getCheckedValues(depContainer),
+          rubros: getCheckedValues(rubroContainer),
+          recursos: getCheckedValues(recursoContainer),
+        };
+      }
+
+      function getRowValues(row) {
+        return {
+          dep: row.dependecia_de_afectacion_de_gastos || '',
+          rubro: buildRubroCodigo(row),
+          recurso: row.recurso || '',
+        };
+      }
+
+      function rowMatchesSelections(rowValues, selections, excludeKey = '') {
+        if (excludeKey !== 'dep' && selections.deps.length && !selections.deps.includes(rowValues.dep)) return false;
+        if (excludeKey !== 'rubro' && selections.rubros.length && !selections.rubros.includes(rowValues.rubro)) return false;
+        if (excludeKey !== 'recurso' && selections.recursos.length && !selections.recursos.includes(rowValues.recurso)) return false;
+        return true;
+      }
+
+      function uniqueSorted(values) {
+        return Array.from(new Set(values.filter(v => v !== ''))).sort((a, b) => a.localeCompare(b, 'es'));
+      }
+
+      function rebuildDependentOptions() {
+        const current = getSelections();
+
+        const depOptions = uniqueSorted(
+          resumenRows
+            .map(getRowValues)
+            .filter(v => rowMatchesSelections(v, current, 'dep'))
+            .map(v => v.dep)
+        );
+
+        const rubroOptions = uniqueSorted(
+          resumenRows
+            .map(getRowValues)
+            .filter(v => rowMatchesSelections(v, current, 'rubro'))
+            .map(v => v.rubro)
+        );
+
+        const recursoOptions = uniqueSorted(
+          resumenRows
+            .map(getRowValues)
+            .filter(v => rowMatchesSelections(v, current, 'recurso'))
+            .map(v => v.recurso)
+        );
+
+        buildFilterDropdown(depContainer, 'Todas las dependencias', depOptions);
+        buildFilterDropdownWithSearch(rubroContainer, 'Todos los rubros', rubroOptions, 'Buscar rubro...');
+        buildFilterDropdown(recursoContainer, 'Todos los recursos', recursoOptions);
+
+        const depPanel = depContainer.querySelector('.filter-panel');
+        const rubroPanel = rubroContainer.querySelector('.filter-panel');
+        const recursoPanel = recursoContainer.querySelector('.filter-panel');
+        if (depPanel) depPanel.onchange = applyFilters;
+        if (rubroPanel) rubroPanel.onchange = applyFilters;
+        if (recursoPanel) recursoPanel.onchange = applyFilters;
       }
 
       function renderTable() {
@@ -1438,9 +1539,11 @@
       }
 
       function applyFilters() {
-        const selDeps = new Set(getCheckedValues(depContainer));
-        const selRubros = new Set(getCheckedValues(rubroContainer));
-        const selRecursos = new Set(getCheckedValues(recursoContainer));
+        rebuildDependentOptions();
+        const selections = getSelections();
+        const selDeps = new Set(selections.deps);
+        const selRubros = new Set(selections.rubros);
+        const selRecursos = new Set(selections.recursos);
 
         currentFiltered = resumenRows.filter(row => {
           if (selDeps.size && !selDeps.has(row.dependecia_de_afectacion_de_gastos || '')) return false;
@@ -1471,19 +1574,12 @@
 
         summaryEl.textContent = `Filas resumen: ${resumenRows.length}. Coinciden con filtros: ${currentFiltered.length}. Total apropiación: $ ${formatMoney(totalApropiacion)}.`;
       }
-      // Recalcular al cambiar cualquier checkbox de los tres filtros
-      const depPanel = depContainer.querySelector('.filter-panel');
-      const rubroPanel = rubroContainer.querySelector('.filter-panel');
-      const recursoPanel = recursoContainer.querySelector('.filter-panel');
-      if (depPanel) depPanel.addEventListener('change', applyFilters);
-      if (rubroPanel) rubroPanel.addEventListener('change', applyFilters);
-      if (recursoPanel) recursoPanel.addEventListener('change', applyFilters);
 
       if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
+        searchInput.oninput = (e) => {
           searchTerm = (e.target.value || '').toString().trim().toLowerCase();
           applyFilters();
-        });
+        };
       }
 
       applyFilters();
@@ -1668,6 +1764,7 @@
     function buildFilterDropdown(container, placeholder, values) {
       if (!container) return;
       const id = container.id || '';
+      const selectedState = filterSelectionState[id] || new Set();
       container.innerHTML = `
         <button type="button" class="filter-toggle">
           <span class="filter-toggle-label">${placeholder}</span>
@@ -1681,7 +1778,7 @@
 
       panel.innerHTML = values.map(v => `
         <div class="filter-option">
-          <input type="checkbox" id="${id}-${CSS.escape(v)}" value="${v}">
+          <input type="checkbox" id="${id}-${CSS.escape(v)}" value="${v}" ${selectedState.has(v) ? 'checked' : ''}>
           <label for="${id}-${CSS.escape(v)}">${v}</label>
         </div>
       `).join('');
@@ -1705,13 +1802,22 @@
         container.classList.toggle('open', !isOpen);
       });
 
-      panel.addEventListener('change', updateLabel);
+      panel.addEventListener('change', (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLInputElement) || target.type !== 'checkbox') return;
+        if (!filterSelectionState[id]) filterSelectionState[id] = new Set();
+        if (target.checked) filterSelectionState[id].add(target.value);
+        else filterSelectionState[id].delete(target.value);
+        updateLabel();
+      });
       updateLabel();
     }
 
     function buildFilterDropdownWithSearch(container, placeholder, values, searchPlaceholder) {
       if (!container) return;
       const id = container.id || '';
+      const selectedState = filterSelectionState[id] || new Set();
+      const savedSearch = filterSearchState[id] || '';
       container.innerHTML = `
         <button type="button" class="filter-toggle">
           <span class="filter-toggle-label">${placeholder}</span>
@@ -1727,11 +1833,12 @@
       const searchInput = panel.querySelector('.filter-text');
       const optionsHost = panel.querySelector('.filter-options');
       const labelSpan = container.querySelector('.filter-toggle-label');
+      searchInput.value = savedSearch;
 
       const options = values.map(v => ({
         value: v,
         id: `${id}-${CSS.escape(v)}`,
-        checked: false,
+        checked: selectedState.has(v),
       }));
 
       function renderOptions(term = '') {
@@ -1756,7 +1863,7 @@
         }
       }
 
-      renderOptions();
+      renderOptions(savedSearch);
       updateLabel();
 
       container.querySelector('.filter-toggle').addEventListener('click', () => {
@@ -1768,6 +1875,7 @@
       });
 
       searchInput.addEventListener('input', () => {
+        filterSearchState[id] = searchInput.value || '';
         renderOptions(searchInput.value || '');
       });
 
@@ -1776,6 +1884,9 @@
         if (!(target instanceof HTMLInputElement) || target.type !== 'checkbox') return;
         const opt = options.find(o => o.value === target.value);
         if (opt) opt.checked = target.checked;
+        if (!filterSelectionState[id]) filterSelectionState[id] = new Set();
+        if (target.checked) filterSelectionState[id].add(target.value);
+        else filterSelectionState[id].delete(target.value);
         updateLabel();
         panel.dispatchEvent(new Event('filters-changed', { bubbles: true }));
       });
@@ -1846,6 +1957,8 @@
             cdpDocs: new Set(),
             crpDocs: new Set(),
             crpLinkedCdps: new Set(),
+            cdpValores: new Map(),
+            crpValores: new Map(),
           });
         }
         return crossMap.get(key);
@@ -1869,7 +1982,10 @@
         if (!target) return;
         target.cdpValorActual += Number(row.valor_actual) || 0;
         if (row.numero_documento !== null && row.numero_documento !== undefined && String(row.numero_documento).trim() !== '') {
-          target.cdpDocs.add(String(row.numero_documento).trim());
+          const cdpDoc = String(row.numero_documento).trim();
+          target.cdpDocs.add(cdpDoc);
+          const acumulado = target.cdpValores.get(cdpDoc) || 0;
+          target.cdpValores.set(cdpDoc, acumulado + (Number(row.valor_actual) || 0));
         }
       });
 
@@ -1882,7 +1998,10 @@
         if (!target) return;
         target.crpValorActual += Number(row.valor_actual) || 0;
         if (row.numero_documento !== null && row.numero_documento !== undefined && String(row.numero_documento).trim() !== '') {
-          target.crpDocs.add(String(row.numero_documento).trim());
+          const crpDoc = String(row.numero_documento).trim();
+          target.crpDocs.add(crpDoc);
+          const acumulado = target.crpValores.get(crpDoc) || 0;
+          target.crpValores.set(crpDoc, acumulado + (Number(row.valor_actual) || 0));
         }
         if (row.cdp !== null && row.cdp !== undefined && String(row.cdp).trim() !== '') {
           target.crpLinkedCdps.add(String(row.cdp).trim());
@@ -1896,21 +2015,82 @@
       cruceDataCache = baseRows;
       cruceFilteredDataCache = baseRows.slice();
 
-      const deps = Array.from(new Set(baseRows.map(r => r.dependencia).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'es'));
-      const rubros = Array.from(new Set(baseRows.map(r => r.rubro).filter(Boolean))).sort((a, b) => a.localeCompare(b, 'es'));
-      const cdps = Array.from(new Set(baseRows.flatMap(r => Array.from(r.cdpDocs)))).sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
-      const crps = Array.from(new Set(baseRows.flatMap(r => Array.from(r.crpDocs)))).sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
-
-      buildFilterDropdownWithSearch(depContainer, 'Todas las dependencias', deps, 'Buscar dependencia...');
-      buildFilterDropdownWithSearch(rubroContainer, 'Todos los rubros', rubros, 'Buscar rubro...');
-      buildFilterDropdownWithSearch(cdpContainer, 'Todos los CDP', cdps, 'Buscar CDP...');
-      buildFilterDropdownWithSearch(crpContainer, 'Todos los CRP', crps, 'Buscar CRP...');
-
       let filteredRows = baseRows.slice();
       let searchTerm = (searchInput.value || '').toString().trim().toLowerCase();
 
       function getCheckedValues(filterContainer) {
         return Array.from(filterContainer.querySelectorAll('input[type="checkbox"]:checked')).map(i => i.value);
+      }
+
+      function getSelections() {
+        return {
+          deps: getCheckedValues(depContainer),
+          rubros: getCheckedValues(rubroContainer),
+          cdps: getCheckedValues(cdpContainer),
+          crps: getCheckedValues(crpContainer),
+        };
+      }
+
+      function rowMatchesSelections(row, selections, excludeKey = '') {
+        if (excludeKey !== 'dep' && selections.deps.length && !selections.deps.includes(row.dependencia)) return false;
+        if (excludeKey !== 'rubro' && selections.rubros.length && !selections.rubros.includes(row.rubro)) return false;
+        if (excludeKey !== 'cdp' && selections.cdps.length) {
+          const has = Array.from(row.cdpDocs).some(v => selections.cdps.includes(v));
+          if (!has) return false;
+        }
+        if (excludeKey !== 'crp' && selections.crps.length) {
+          const has = Array.from(row.crpDocs).some(v => selections.crps.includes(v));
+          if (!has) return false;
+        }
+        return true;
+      }
+
+      function uniqueSorted(values, numeric = false) {
+        return Array.from(new Set(values.filter(v => v !== ''))).sort((a, b) => a.localeCompare(b, 'es', numeric ? { numeric: true } : undefined));
+      }
+
+      function rebuildDependentOptions() {
+        const current = getSelections();
+
+        const depOptions = uniqueSorted(
+          baseRows
+            .filter(r => rowMatchesSelections(r, current, 'dep'))
+            .map(r => r.dependencia)
+        );
+
+        const rubroOptions = uniqueSorted(
+          baseRows
+            .filter(r => rowMatchesSelections(r, current, 'rubro'))
+            .map(r => r.rubro)
+        );
+
+        const cdpOptions = uniqueSorted(
+          baseRows
+            .filter(r => rowMatchesSelections(r, current, 'cdp'))
+            .flatMap(r => Array.from(r.cdpDocs)),
+          true
+        );
+
+        const crpOptions = uniqueSorted(
+          baseRows
+            .filter(r => rowMatchesSelections(r, current, 'crp'))
+            .flatMap(r => Array.from(r.crpDocs)),
+          true
+        );
+
+        buildFilterDropdownWithSearch(depContainer, 'Todas las dependencias', depOptions, 'Buscar dependencia...');
+        buildFilterDropdownWithSearch(rubroContainer, 'Todos los rubros', rubroOptions, 'Buscar rubro...');
+        buildFilterDropdownWithSearch(cdpContainer, 'Todos los CDP', cdpOptions, 'Buscar CDP...');
+        buildFilterDropdownWithSearch(crpContainer, 'Todos los CRP', crpOptions, 'Buscar CRP...');
+
+        const depPanel = depContainer.querySelector('.filter-panel');
+        const rubroPanel = rubroContainer.querySelector('.filter-panel');
+        const cdpPanel = cdpContainer.querySelector('.filter-panel');
+        const crpPanel = crpContainer.querySelector('.filter-panel');
+        if (depPanel) depPanel.onchange = applyCruceFilters;
+        if (rubroPanel) rubroPanel.onchange = applyCruceFilters;
+        if (cdpPanel) cdpPanel.onchange = applyCruceFilters;
+        if (crpPanel) crpPanel.onchange = applyCruceFilters;
       }
 
       function renderCruceRows() {
@@ -1958,10 +2138,12 @@
       }
 
       function applyCruceFilters() {
-        const selDeps = new Set(getCheckedValues(depContainer));
-        const selRubros = new Set(getCheckedValues(rubroContainer));
-        const selCdps = new Set(getCheckedValues(cdpContainer));
-        const selCrps = new Set(getCheckedValues(crpContainer));
+        rebuildDependentOptions();
+        const selections = getSelections();
+        const selDeps = new Set(selections.deps);
+        const selRubros = new Set(selections.rubros);
+        const selCdps = new Set(selections.cdps);
+        const selCrps = new Set(selections.crps);
 
         filteredRows = baseRows.filter(row => {
           if (selDeps.size && !selDeps.has(row.dependencia)) return false;
@@ -2003,6 +2185,13 @@
       }
 
       exportBtn.onclick = () => {
+        const formatDocValues = (valuesMap) => {
+          const items = Array.from(valuesMap.entries())
+            .sort((a, b) => a[0].localeCompare(b[0], 'es', { numeric: true }))
+            .map(([doc, value]) => `${doc}: $ ${formatMoney(value)}`);
+          return items.join(' | ');
+        };
+
         const columns = [
           { key: 'dependencia', header: 'Dependencia' },
           { key: 'rubro', header: 'Rubro' },
@@ -2012,7 +2201,9 @@
           { key: 'cdpCount', header: 'Cantidad CDP', getter: row => row.cdpDocs.size },
           { key: 'crpCount', header: 'Cantidad CRP', getter: row => row.crpDocs.size },
           { key: 'cdpList', header: 'CDP (todos)', getter: row => Array.from(row.cdpDocs).sort((a, b) => a.localeCompare(b, 'es', { numeric: true })).join(', ') },
+          { key: 'cdpValores', header: 'CDP y valor actual', getter: row => formatDocValues(row.cdpValores) },
           { key: 'crpList', header: 'CRP (todos)', getter: row => Array.from(row.crpDocs).sort((a, b) => a.localeCompare(b, 'es', { numeric: true })).join(', ') },
+          { key: 'crpValores', header: 'CRP y valor actual', getter: row => formatDocValues(row.crpValores) },
           { key: 'linkedList', header: 'Vínculo CRP->CDP (todos)', getter: row => Array.from(row.crpLinkedCdps).sort((a, b) => a.localeCompare(b, 'es', { numeric: true })).join(', ') },
         ];
 
@@ -2022,18 +2213,9 @@
           filename: 'cruce_filtrado.xlsx',
           sheetName: 'Cruce',
           numericKeys: ['ejeApropiacion', 'cdpValorActual', 'crpValorActual'],
-          colWidths: [34, 20, 20, 22, 22, 14, 14, 45, 45, 45],
+          colWidths: [34, 20, 20, 22, 22, 14, 14, 34, 45, 34, 45, 38],
         });
       };
-
-      const depPanel = depContainer.querySelector('.filter-panel');
-      const rubroPanel = rubroContainer.querySelector('.filter-panel');
-      const cdpPanel = cdpContainer.querySelector('.filter-panel');
-      const crpPanel = crpContainer.querySelector('.filter-panel');
-      if (depPanel) depPanel.addEventListener('change', applyCruceFilters);
-      if (rubroPanel) rubroPanel.addEventListener('change', applyCruceFilters);
-      if (cdpPanel) cdpPanel.addEventListener('change', applyCruceFilters);
-      if (crpPanel) crpPanel.addEventListener('change', applyCruceFilters);
 
       searchInput.oninput = (e) => {
         searchTerm = (e.target.value || '').toString().trim().toLowerCase();
