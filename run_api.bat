@@ -8,5 +8,5 @@ if not exist ejecucion_presupuestal (
 
 call ejecucion_presupuestal\Scripts\activate.bat
 set PORT=8000
-start "Swagger" http://127.0.0.1:%PORT%/docs
+start "Presupuesto" http://127.0.0.1:%PORT%/dashboard
 uvicorn app.main:app --reload --host 127.0.0.1 --port %PORT%
