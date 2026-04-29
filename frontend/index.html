@@ -94,14 +94,30 @@
 
     .filter-text { padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.78rem; }
 
-    .data-table { margin-top: 8px; border-radius: 12px; border: 1px solid var(--border); background: #ffffff; overflow: hidden; font-size: 0.78rem; }
+    .data-table { margin-top: 8px; border-radius: 12px; border: 1px solid var(--border); background: #ffffff; overflow-x: auto; overflow-y: hidden; font-size: 0.78rem; }
     .data-table-header, .data-table-row { display: grid; grid-template-columns: 1.4fr 1.2fr 1fr 1fr; padding: 9px 10px; align-items: center; }
     .data-table-header { background: #f3f4f6; color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); }
     .data-table-row:nth-child(even) { background: #f9fafb; }
     .data-table-row:nth-child(odd) { background: #ffffff; }
     .data-table-header-eje, .data-table-row-eje { grid-template-columns: 1.25fr 1.15fr 1fr 0.75fr 1fr; }
-    .data-table-header-5, .data-table-row-5 { grid-template-columns: 0.7fr 0.8fr 1.7fr 1.1fr 0.7fr; }
-    .data-table-header-cruce, .data-table-row-cruce { grid-template-columns: 1.2fr 1fr 0.9fr 0.9fr 0.9fr 0.75fr 0.75fr 0.95fr; }
+    .data-table-header-5, .data-table-row-5 { grid-template-columns: 0.7fr 0.8fr 1.6fr 1fr 1fr 0.7fr; }
+    #cruce-table-body { display: grid; grid-template-columns: 1fr; }
+    .data-table { width: 100%; }
+    .data-table-header-cruce { display: grid; grid-template-columns: 0.8fr 1fr 1.6fr 1fr 1fr 0.9fr 0.8fr 0.8fr; width: 100%; box-sizing: border-box; padding: 6px 8px; font-size: 0.72rem; }
+    .data-table-row-cruce { display: grid; grid-template-columns: 0.8fr 1fr 1.6fr 1fr 1fr 0.9fr 0.8fr 0.8fr 0.8fr; width: 100%; box-sizing: border-box; padding: 6px 8px; font-size: 0.78rem; align-items: center; cursor: pointer; }
+    .data-table-row-cruce > span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .data-table-row-cruce > span:nth-child(2),
+    .data-table-row-cruce > span:nth-child(3) {
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      line-height: 1.2;
+    }
+    .data-table-row-cruce.is-selected { background: #dbeafe !important; box-shadow: inset 0 0 0 1px #60a5fa; }
+    .status-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 74px; padding: 2px 8px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; border: 1px solid transparent; }
+    .status-green { background: #dcfce7; color: #166534; border-color: #86efac; }
+    .status-yellow { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
+    .status-red { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
 
     .pagination { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-top: 1px solid var(--border); font-size: 0.78rem; background: #ffffff; }
     .pagination-info { color: var(--text-muted); }
@@ -161,11 +177,11 @@
           </div>
 
           <div class="metric-row">
-            <span class="muted">Total Apropiación (valor inicial)</span>
+            <span class="muted">Total Apropiación (valor actual)</span>
             <strong id="resumen-cdp-total">&mdash;</strong>
           </div>
           <div class="metric-row">
-            <span class="muted">Total Ejecución (valor inicial)</span>
+            <span class="muted">Total Ejecución (valor actual)</span>
             <strong id="resumen-crp-total">&mdash;</strong>
           </div>
           <div class="metric-row">
@@ -370,6 +386,10 @@
                 <div id="cdp-filter-recurso" class="filter-dropdown"></div>
               </div>
               <div class="filter-group">
+                <label class="filter-label" for="cdp-filter-objeto">Objeto</label>
+                <div id="cdp-filter-objeto" class="filter-dropdown"></div>
+              </div>
+              <div class="filter-group">
                 <label class="filter-label" for="cdp-filter-numero">CDP</label>
                 <div id="cdp-filter-numero" class="filter-dropdown"></div>
               </div>
@@ -384,6 +404,7 @@
                 <span>Tipo Apropiación</span>
                 <span>Dependencia</span>
                 <span>Rubro</span>
+                <span>Objeto</span>
                 <span>Valor actual</span>
               </div>
               <div id="cdp-table-body"></div>
@@ -454,12 +475,16 @@
             </div>
             <div class="filters" style="margin-top:0;">
               <div class="filter-group">
-                <label class="filter-label" for="cruce-filter-dependencia">Dependencia</label>
-                <div id="cruce-filter-dependencia" class="filter-dropdown"></div>
+                <label class="filter-label" for="cruce-filter-dependencia-numero">Dependencia - Número</label>
+                <div id="cruce-filter-dependencia-numero" class="filter-dropdown"></div>
               </div>
               <div class="filter-group">
-                <label class="filter-label" for="cruce-filter-rubro">Rubro</label>
-                <div id="cruce-filter-rubro" class="filter-dropdown"></div>
+                <label class="filter-label" for="cruce-filter-dependencia-centro">Dependencia - Centro</label>
+                <div id="cruce-filter-dependencia-centro" class="filter-dropdown"></div>
+              </div>
+              <div class="filter-group">
+                <label class="filter-label" for="cruce-filter-dependencia-nombre">Dependencia - Nombre</label>
+                <div id="cruce-filter-dependencia-nombre" class="filter-dropdown"></div>
               </div>
               <div class="filter-group">
                 <label class="filter-label" for="cruce-filter-cdp">CDP</label>
@@ -474,19 +499,21 @@
             <p class="muted" id="cruce-table-summary">Cruza apropiación vigente EJE, valor actual Apropiación y valor actual Ejecución.</p>
 
             <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:6px; gap:8px;">
-              <button type="button" class="btn" id="cruce-export-btn">Exportar</button>
+              <button type="button" class="btn" id="cruce-export-btn">Exportar resumen</button>
+              <button type="button" class="btn" id="cruce-detail-export-btn">Exportar detalle</button>
             </div>
 
             <div class="data-table" id="cruce-table" aria-label="Cruce EJE Apropiación Ejecución">
               <div class="data-table-header data-table-header-cruce">
+                <span>Dep. número</span>
+                <span>Centro</span>
                 <span>Dependencia</span>
-                <span>Rubro</span>
                 <span>Aprop. vigente EJE</span>
                 <span>Valor actual Aprop.</span>
                 <span>Valor actual Ejec.</span>
                 <span>CDP</span>
                 <span>CRP</span>
-                <span>Vínculo CRP→CDP</span>
+                <span>% / Semáforo</span>
               </div>
               <div id="cruce-table-body"></div>
               <div class="pagination" id="cruce-pagination">
@@ -520,6 +547,28 @@
             <span class="muted">Ejecución (/crp GET)</span>
             <div class="status" id="status-crp"><span class="dot"></span><span>Comprobando...</span></div>
           </div>
+
+              <section class="card">
+                <div class="card-inner">
+                  <div class="card-header">
+                    <div class="card-title">Administración — Eliminar datos</div>
+                  </div>
+                  <p class="muted">Elimina los datos de las tablas sin tocar la estructura. Operación irreversible; obliga múltiples confirmaciones.</p>
+
+                  <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
+                    <select id="admin-truncate-select" class="filter-text" style="padding:8px;">
+                      <option value="cdp">cdp</option>
+                      <option value="crp">crp</option>
+                      <option value="eje">eje</option>
+                      <option value="all">Todas las tablas</option>
+                    </select>
+                    <button class="btn" id="admin-truncate-btn" style="background:#dc2626; border-color:#dc2626;">Eliminar seleccionada</button>
+                    <button class="btn" id="admin-truncate-all-btn" style="background:#991b1b; border-color:#991b1b;">Eliminar todas</button>
+                  </div>
+
+                  <div id="admin-truncate-status" class="muted" style="margin-top:8px;"></div>
+                </div>
+              </section>
 
           <p class="muted" style="margin-top:10px;">
             Este panel asume que el backend FastAPI está corriendo en <strong>http://127.0.0.1:8000</strong>.
@@ -896,16 +945,12 @@
           return acc + (Number(row.valor_actual) || 0);
         }, 0);
 
-        const crpTotalResumen = crpFiltered.reduce((acc, row) => {
-          return acc + (Number(row.valor_inicial) || 0);
-        }, 0);
-
         const crpTotalActual = crpFiltered.reduce((acc, row) => {
           return acc + (Number(row.valor_actual) || 0);
         }, 0);
 
         cdpTotalEl.textContent = '$ ' + formatMoney(cdpTotal);
-        crpTotalEl.textContent = '$ ' + formatMoney(crpTotalResumen);
+        crpTotalEl.textContent = '$ ' + formatMoney(crpTotalActual);
 
         const cdpFechaEl = document.getElementById('resumen-cdp-fecha-corte');
         const crpFechaEl = document.getElementById('resumen-crp-fecha-corte');
@@ -938,6 +983,81 @@
       }
     }
 
+    // --- Administración: truncado de tablas ---
+    function safeConfirmSequence(actionDesc) {
+      // Retorna true solo si pasan todas las confirmaciones
+      const step1 = confirm(`⚠️ ATENCIÓN: Va a ejecutar: ${actionDesc}.\n\nPresione Aceptar para continuar.`);
+      if (!step1) return false;
+      const step2 = confirm('🔴 CONFIRMACIÓN: Esta acción ELIMINARÁ datos PERMANENTEMENTE.\n\nPresione Aceptar para proceder.');
+      if (!step2) return false;
+      const step4 = confirm('⚠️ ÚLTIMO AVISO: Esta operación es irreversible. ¿Desea continuar?');
+      return step4;
+    }
+
+    async function executeAdminTruncateSelected() {
+      const select = document.getElementById('admin-truncate-select');
+      const statusEl = document.getElementById('admin-truncate-status');
+      const table = select ? select.value : null;
+      if (!table) return;
+
+      if (table === 'all') {
+        // redirect to the bulk flow to keep UX explicit
+        await executeAdminTruncateAll();
+        return;
+      }
+
+      const ok = safeConfirmSequence(`Truncar tabla ${table}`);
+      if (!ok) return;
+
+      statusEl.textContent = 'Ejecutando...';
+      try {
+        const res = await fetch(`${API_BASE}/admin/truncate/${encodeURIComponent(table)}`, { method: 'POST' });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || `HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        statusEl.textContent = `✓ ${data.message || 'Tabla truncada.'}`;
+        setTimeout(() => location.reload(), 800);
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = `Error: ${err.message}`;
+        alert(`Error: ${err.message}`);
+      }
+    }
+
+    async function executeAdminTruncateAll() {
+      const statusEl = document.getElementById('admin-truncate-status');
+      const ok = safeConfirmSequence('Truncar todas las tablas (cdp, crp, eje)');
+      if (!ok) return;
+
+      statusEl.textContent = 'Ejecutando borrado de todas las tablas...';
+      try {
+        const res = await fetch(`${API_BASE}/admin/truncate-all`, { method: 'POST' });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || `HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        statusEl.textContent = `✓ ${data.message || 'Todas las tablas truncadas.'}`;
+        setTimeout(() => location.reload(), 800);
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = `Error: ${err.message}`;
+        alert(`Error: ${err.message}`);
+      }
+    }
+
+    function setupAdminTruncateControls() {
+      const btn = document.getElementById('admin-truncate-btn');
+      const btnAll = document.getElementById('admin-truncate-all-btn');
+      if (btn) btn.addEventListener('click', executeAdminTruncateSelected);
+      if (btnAll) btnAll.addEventListener('click', executeAdminTruncateAll);
+    }
+
+    // Inicializar controles administrativos
+    try { setupAdminTruncateControls(); } catch (e) { /* no bloquear */ }
+
     function renderCdpTable() {
       const body = document.getElementById('cdp-table-body');
       if (!body) return;
@@ -969,11 +1089,14 @@
         const dep = row.dependencia || '';
         const depDesc = row.dependencia_descripcion || '';
         const depFull = depDesc ? `${dep} - ${depDesc}` : dep;
+        const objetoFull = (row.objeto || '').toString();
+        const objetoShort = objetoFull.includes(':') ? objetoFull.split(':')[0].trim() : objetoFull.trim();
         div.innerHTML = `
           <span>${row.numero_documento != null ? row.numero_documento : ''}</span>
           <span>${row.tipo_cdp || ''}</span>
-          <span title="${depFull}">${depFull.slice(0, 40)}${depFull.length > 40 ? '…' : ''}</span>
+          <span title="${depFull}">${depFull}</span>
           <span>${row.rubro || ''}</span>
+          <span title="${objetoShort}">${objetoShort.slice(0,40)}${objetoShort.length > 40 ? '…' : ''}</span>
           <span>$ ${formatMoney(row.valor_actual)}</span>
         `;
         body.appendChild(div);
@@ -1029,7 +1152,7 @@
         const depFull = depDesc ? `${dep} - ${depDesc}` : dep;
         div.innerHTML = `
           <span>${row.numero_documento != null ? row.numero_documento : ''}</span>
-          <span title="${depFull}">${depFull.slice(0, 40)}${depFull.length > 40 ? '…' : ''}</span>
+          <span title="${depFull}">${depFull}</span>
           <span>${row.rubro || ''}</span>
           <span>$ ${formatMoney(row.valor_actual)}</span>
           <span>${row.cdp != null ? row.cdp : ''}</span>
@@ -1096,9 +1219,10 @@
       const depContainer = document.getElementById('cdp-filter-dependencia');
       const rubroContainer = document.getElementById('cdp-filter-rubro');
       const recursoContainer = document.getElementById('cdp-filter-recurso');
+      const objetoContainer = document.getElementById('cdp-filter-objeto');
       const numeroContainer = document.getElementById('cdp-filter-numero');
       const searchInput = document.getElementById('cdp-search-input');
-      if (!depContainer || !rubroContainer || !recursoContainer || !numeroContainer || !searchInput) return;
+      if (!depContainer || !rubroContainer || !recursoContainer || !numeroContainer || !searchInput || !objetoContainer) return;
 
       let searchTerm = '';
 
@@ -1111,6 +1235,7 @@
           deps: getCheckedValues(depContainer),
           rubros: getCheckedValues(rubroContainer),
           recursos: getCheckedValues(recursoContainer),
+          objetos: getCheckedValues(objetoContainer),
           numeros: getCheckedValues(numeroContainer),
         };
       }
@@ -1118,10 +1243,13 @@
       function getRowValues(row) {
         const dep = row.dependencia || '';
         const depDesc = row.dependencia_descripcion || '';
+        const objetoFull = (row.objeto || '').toString();
+        const objetoShort = objetoFull.includes(':') ? objetoFull.split(':')[0].trim() : objetoFull.trim();
         return {
           depFull: depDesc ? `${dep} - ${depDesc}` : dep,
           rubro: row.rubro || '',
           recurso: row.recurso || '',
+          objeto: objetoShort || '',
           numero: row.numero_documento !== null && row.numero_documento !== undefined ? String(row.numero_documento).trim() : '',
         };
       }
@@ -1130,6 +1258,7 @@
         if (excludeKey !== 'dep' && selections.deps.length && !selections.deps.includes(rowValues.depFull)) return false;
         if (excludeKey !== 'rubro' && selections.rubros.length && !selections.rubros.includes(rowValues.rubro)) return false;
         if (excludeKey !== 'recurso' && selections.recursos.length && !selections.recursos.includes(rowValues.recurso)) return false;
+        if (excludeKey !== 'objeto' && selections.objetos.length && !selections.objetos.includes(rowValues.objeto)) return false;
         if (excludeKey !== 'numero' && selections.numeros.length && !selections.numeros.includes(rowValues.numero)) return false;
         return true;
       }
@@ -1162,6 +1291,13 @@
             .map(v => v.recurso)
         );
 
+        const objetoOptions = uniqueSorted(
+          cdpDataCache
+            .map(getRowValues)
+            .filter(v => rowMatchesSelections(v, current, 'objeto'))
+            .map(v => v.objeto)
+        );
+
         const numeroOptions = uniqueSorted(
           cdpDataCache
             .map(getRowValues)
@@ -1173,6 +1309,7 @@
         buildFilterDropdown(depContainer, 'Todas las dependencias', depOptions);
         buildFilterDropdownWithSearch(rubroContainer, 'Todos los rubros', rubroOptions, 'Buscar rubro...');
         buildFilterDropdownWithSearch(recursoContainer, 'Todos los recursos', recursoOptions, 'Buscar recurso...');
+        buildFilterDropdownWithSearch(objetoContainer, 'Todos los objetos', objetoOptions, 'Buscar objeto...');
         buildFilterDropdownWithSearch(numeroContainer, 'Todos los CDP', numeroOptions, 'Buscar CDP...');
 
         const depPanel = depContainer.querySelector('.filter-panel');
@@ -1182,6 +1319,8 @@
         if (depPanel) depPanel.onchange = applyFilters;
         if (rubroPanel) rubroPanel.onchange = applyFilters;
         if (recursoPanel) recursoPanel.onchange = applyFilters;
+        const objetoPanel = objetoContainer.querySelector('.filter-panel');
+        if (objetoPanel) objetoPanel.onchange = applyFilters;
         if (numeroPanel) numeroPanel.onchange = applyFilters;
       }
 
@@ -1191,6 +1330,7 @@
         const selDeps = new Set(selections.deps);
         const selRubros = new Set(selections.rubros);
         const selRecursos = new Set(selections.recursos);
+        const selObjetos = new Set(selections.objetos);
         const selNumeros = new Set(selections.numeros);
         cdpFilteredDataCache = cdpDataCache.filter(row => {
           const dep = row.dependencia || '';
@@ -1198,6 +1338,8 @@
           const depFull = depDesc ? `${dep} - ${depDesc}` : dep;
           const rubro = row.rubro || '';
           const recurso = row.recurso || '';
+          const objetoFull = (row.objeto || '').toString();
+          const objetoShort = objetoFull.includes(':') ? objetoFull.split(':')[0].trim() : objetoFull.trim();
           const numeroDocumento = row.numero_documento !== null && row.numero_documento !== undefined
             ? String(row.numero_documento).trim()
             : '';
@@ -1205,6 +1347,7 @@
           if (selDeps.size && !selDeps.has(depFull)) return false;
           if (selRubros.size && !selRubros.has(rubro)) return false;
           if (selRecursos.size && !selRecursos.has(recurso)) return false;
+          if (selObjetos.size && !selObjetos.has(objetoShort)) return false;
           if (selNumeros.size && !selNumeros.has(numeroDocumento)) return false;
 
           if (searchTerm) {
@@ -1215,6 +1358,7 @@
               depDesc,
               rubro,
               row.descripcion,
+              objetoFull,
             ]
               .map(v => (v || '').toString().toLowerCase())
               .join(' ');
@@ -1843,8 +1987,10 @@
 
       function renderOptions(term = '') {
         const q = term.toLowerCase();
-        const filtered = options.filter(opt => opt.value.toLowerCase().includes(q));
-        optionsHost.innerHTML = filtered.map(opt => `
+        const checked = options.filter(opt => opt.checked);
+        const filtered = options.filter(opt => opt.value.toLowerCase().includes(q) && !opt.checked);
+        const toRender = [...checked, ...filtered];
+        optionsHost.innerHTML = toRender.map(opt => `
           <div class="filter-option">
             <input type="checkbox" id="${opt.id}" value="${opt.value}" ${opt.checked ? 'checked' : ''}>
             <label for="${opt.id}">${opt.value}</label>
@@ -1903,6 +2049,35 @@
         .trim();
     }
 
+    function parseDependencyParts(value) {
+      const text = (value === null || value === undefined) ? '' : String(value).trim();
+      if (!text) {
+        return { numero: '', centro: '', nombre: '' };
+      }
+
+      const match = text.match(/^\s*(\d+)\s*(.*)$/);
+      if (!match) {
+        return { numero: '', centro: '', nombre: text };
+      }
+
+      const numero = match[1].trim();
+      const remainder = (match[2] || '').trim().replace(/^[-\s]+/, '');
+      if (!remainder) {
+        return { numero, centro: '', nombre: '' };
+      }
+
+      const hyphenIndex = remainder.indexOf(' - ');
+      if (hyphenIndex === -1) {
+        return { numero, centro: remainder, nombre: '' };
+      }
+
+      return {
+        numero,
+        centro: remainder.slice(0, hyphenIndex).trim(),
+        nombre: remainder.slice(hyphenIndex + 3).trim(),
+      };
+    }
+
     function dependencyJoinKey(value) {
       const normalized = normalizeJoinValue(value);
       const codeMatch = normalized.match(/\b\d{4,}\b/);
@@ -1914,6 +2089,12 @@
       return normalizeJoinValue(value).replace(/\s+/g, '');
     }
 
+    function getCentroNameByCodigo(codigo) {
+      const primeros4 = (codigo || '').substring(0, 4);
+      const option = CENTRO_FORMACION_OPTIONS.find(opt => opt.code === primeros4);
+      return option ? option.label : primeros4 || 'Sin centro';
+    }
+
     function summarizeNumberList(values, maxItems = 2) {
       const sorted = (values || []).slice().sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
       if (!sorted.length) return '0';
@@ -1921,42 +2102,66 @@
       return `${sorted.length} (${sorted.slice(0, maxItems).join(', ')}...)`;
     }
 
+    function getSemaforoInfo(porcentaje) {
+      const pct = Number.isFinite(porcentaje) ? porcentaje : 0;
+      if (pct > 0.75) {
+        return { label: 'Verde', className: 'status-green' };
+      }
+      if (pct >= 0.33) {
+        return { label: 'Amarillo', className: 'status-yellow' };
+      }
+      return { label: 'Rojo', className: 'status-red' };
+    }
+
+    function formatPercentValue(porcentaje) {
+      const pct = Number.isFinite(porcentaje) ? porcentaje : 0;
+      return `${(pct * 100).toFixed(1)}%`;
+    }
+
     function setupCruceTable() {
       const container = document.getElementById('table-cruce-container');
-      const depContainer = document.getElementById('cruce-filter-dependencia');
-      const rubroContainer = document.getElementById('cruce-filter-rubro');
+      const depNumeroContainer = document.getElementById('cruce-filter-dependencia-numero');
+      const depCentroContainer = document.getElementById('cruce-filter-dependencia-centro');
+      const depNombreContainer = document.getElementById('cruce-filter-dependencia-nombre');
       const cdpContainer = document.getElementById('cruce-filter-cdp');
       const crpContainer = document.getElementById('cruce-filter-crp');
       const searchInput = document.getElementById('cruce-search-input');
       const summaryEl = document.getElementById('cruce-table-summary');
       const exportBtn = document.getElementById('cruce-export-btn');
+      const detailExportBtn = document.getElementById('cruce-detail-export-btn');
       const bodyEl = document.getElementById('cruce-table-body');
       const pageInfoEl = document.getElementById('cruce-page-info');
       const pageCurrentEl = document.getElementById('cruce-page-current');
       const pagePrevEl = document.getElementById('cruce-page-prev');
       const pageNextEl = document.getElementById('cruce-page-next');
 
-      if (!container || !depContainer || !rubroContainer || !cdpContainer || !crpContainer || !searchInput || !summaryEl || !exportBtn || !bodyEl || !pageInfoEl || !pageCurrentEl || !pagePrevEl || !pageNextEl) return;
+      if (!container || !depNumeroContainer || !depCentroContainer || !depNombreContainer || !cdpContainer || !crpContainer || !searchInput || !summaryEl || !exportBtn || !detailExportBtn || !bodyEl || !pageInfoEl || !pageCurrentEl || !pagePrevEl || !pageNextEl) return;
 
       const crossMap = new Map();
+      const selectedCrossKeys = new Set();
 
-      function getOrCreateCrossRow(depValue, rubroValue) {
+      function getOrCreateCrossRow(depValue, codigoDepenciencia = null, nombreDependencia = null) {
         const depKey = dependencyJoinKey(depValue);
-        const rubroKey = rubroJoinKey(rubroValue);
-        if (!depKey || !rubroKey) return null;
+        if (!depKey) return null;
 
-        const key = `${depKey}|${rubroKey}`;
+        const key = depKey;
         if (!crossMap.has(key)) {
+          const parts = parseDependencyParts(depValue);
+          const codigo = codigoDepenciencia || parts.numero || '';
+          const centroNombre = getCentroNameByCodigo(codigo);
+          const nombre = nombreDependencia !== null ? nombreDependencia : (parts.nombre || 'Sin dependencia');
+          
           crossMap.set(key, {
             key,
-            dependencia: depValue || 'Sin dependencia',
-            rubro: rubroValue || 'Sin rubro',
+            dependenciaNumero: parts.numero || 'Sin número',
+            dependenciaCentro: centroNombre,
+            dependenciaNombre: nombre,
+            dependenciaOriginal: depValue || 'Sin dependencia',
             ejeApropiacion: 0,
             cdpValorActual: 0,
             crpValorActual: 0,
             cdpDocs: new Set(),
             crpDocs: new Set(),
-            crpLinkedCdps: new Set(),
             cdpValores: new Map(),
             crpValores: new Map(),
           });
@@ -1967,8 +2172,11 @@
       const ejeRows = (ejeDataCache || []).filter(r => r.es_resumen === true || r.es_resumen === 1);
       ejeRows.forEach(row => {
         const dep = row.dependecia_de_afectacion_de_gastos || '';
-        const rubro = buildRubroCodigo(row) || row.rubro || '';
-        const target = getOrCreateCrossRow(dep, rubro);
+        const codigoMatch = dep.match(/^\s*(\d+)/);
+        const codigo = codigoMatch ? codigoMatch[1] : '';
+        const nombreMatch = dep.match(/^\s*\d+\s*[-\s]+(.*)$/);
+        const nombre = nombreMatch ? nombreMatch[1].trim() : dep;
+        const target = getOrCreateCrossRow(dep, codigo, nombre);
         if (!target) return;
         target.ejeApropiacion += Number(row.apropiacion_vigente_dep_gsto) || 0;
       });
@@ -1977,8 +2185,7 @@
         const dep = (row.dependencia_descripcion || '').trim()
           ? `${row.dependencia || ''} - ${row.dependencia_descripcion || ''}`
           : (row.dependencia || '');
-        const rubro = row.rubro || '';
-        const target = getOrCreateCrossRow(dep, rubro);
+        const target = getOrCreateCrossRow(dep, row.dependencia, row.dependencia_descripcion);
         if (!target) return;
         target.cdpValorActual += Number(row.valor_actual) || 0;
         if (row.numero_documento !== null && row.numero_documento !== undefined && String(row.numero_documento).trim() !== '') {
@@ -1993,8 +2200,7 @@
         const dep = (row.dependencia_descripcion || '').trim()
           ? `${row.dependencia || ''} - ${row.dependencia_descripcion || ''}`
           : (row.dependencia || '');
-        const rubro = row.rubro || '';
-        const target = getOrCreateCrossRow(dep, rubro);
+        const target = getOrCreateCrossRow(dep, row.dependencia, row.dependencia_descripcion);
         if (!target) return;
         target.crpValorActual += Number(row.valor_actual) || 0;
         if (row.numero_documento !== null && row.numero_documento !== undefined && String(row.numero_documento).trim() !== '') {
@@ -2002,9 +2208,6 @@
           target.crpDocs.add(crpDoc);
           const acumulado = target.crpValores.get(crpDoc) || 0;
           target.crpValores.set(crpDoc, acumulado + (Number(row.valor_actual) || 0));
-        }
-        if (row.cdp !== null && row.cdp !== undefined && String(row.cdp).trim() !== '') {
-          target.crpLinkedCdps.add(String(row.cdp).trim());
         }
       });
 
@@ -2018,22 +2221,136 @@
       let filteredRows = baseRows.slice();
       let searchTerm = (searchInput.value || '').toString().trim().toLowerCase();
 
+      function getExecutionPercent(cdpValor, crpValor) {
+        const cdp = Number(cdpValor) || 0;
+        const crp = Number(crpValor) || 0;
+        if (!cdp) return 0;
+        return crp / cdp;
+      }
+
+      function getDetailRowsForSelectedOrFiltered() {
+        const sourceRows = selectedCrossKeys.size
+          ? baseRows.filter(row => selectedCrossKeys.has(row.key))
+          : filteredRows;
+
+        const detailRows = [];
+        sourceRows.forEach(row => {
+          const depKey = row.key;
+          const depNumero = row.dependenciaNumero || '';
+          const depCentro = row.dependenciaCentro || '';
+          const depNombre = row.dependenciaNombre || '';
+          const depOriginal = row.dependenciaOriginal || '';
+
+          const cdpGroups = new Map();
+          (cdpDataCache || []).forEach(cdpRow => {
+            const dep = (cdpRow.dependencia_descripcion || '').trim()
+              ? `${cdpRow.dependencia || ''} - ${cdpRow.dependencia_descripcion || ''}`
+              : (cdpRow.dependencia || '');
+            if (dependencyJoinKey(dep) !== depKey) return;
+            const cdpDoc = cdpRow.numero_documento !== null && cdpRow.numero_documento !== undefined
+              ? String(cdpRow.numero_documento).trim()
+              : '';
+            if (!cdpDoc) return;
+            if (!cdpGroups.has(cdpDoc)) {
+              cdpGroups.set(cdpDoc, { valor: 0, rows: [] });
+            }
+            const group = cdpGroups.get(cdpDoc);
+            group.valor += Number(cdpRow.valor_actual) || 0;
+            group.rows.push(cdpRow);
+          });
+
+          const crpGroupsByCdp = new Map();
+          (crpDataCache || []).forEach(crpRow => {
+            const dep = (crpRow.dependencia_descripcion || '').trim()
+              ? `${crpRow.dependencia || ''} - ${crpRow.dependencia_descripcion || ''}`
+              : (crpRow.dependencia || '');
+            if (dependencyJoinKey(dep) !== depKey) return;
+            const cdpDoc = crpRow.cdp !== null && crpRow.cdp !== undefined
+              ? String(crpRow.cdp).trim()
+              : '';
+            if (!cdpDoc) return;
+            if (!crpGroupsByCdp.has(cdpDoc)) {
+              crpGroupsByCdp.set(cdpDoc, new Map());
+            }
+            const crpDoc = crpRow.numero_documento !== null && crpRow.numero_documento !== undefined
+              ? String(crpRow.numero_documento).trim()
+              : '';
+            const docKey = crpDoc || 'sin_crp';
+            const group = crpGroupsByCdp.get(cdpDoc);
+            group.set(docKey, (group.get(docKey) || 0) + (Number(crpRow.valor_actual) || 0));
+          });
+
+          Array.from(cdpGroups.entries())
+            .sort((a, b) => a[0].localeCompare(b[0], 'es', { numeric: true }))
+            .forEach(([cdpDoc, cdpGroup]) => {
+              const crpMap = crpGroupsByCdp.get(cdpDoc) || new Map();
+              const totalCrp = Array.from(crpMap.values()).reduce((acc, value) => acc + (Number(value) || 0), 0);
+              const porcentaje = getExecutionPercent(cdpGroup.valor, totalCrp);
+              const semaforo = getSemaforoInfo(porcentaje);
+              const saldo = (Number(cdpGroup.valor) || 0) - totalCrp;
+              const crpEntries = Array.from(crpMap.entries()).sort((a, b) => a[0].localeCompare(b[0], 'es', { numeric: true }));
+              if (!crpEntries.length) {
+                detailRows.push({
+                  depKey,
+                  dependenciaNumero: depNumero,
+                  dependenciaCentro: depCentro,
+                  dependenciaNombre: depNombre,
+                  dependenciaOriginal: depOriginal,
+                  cdpDocumento: cdpDoc,
+                  cdpValor: cdpGroup.valor,
+                  totalCrp,
+                  porcentaje,
+                  saldo,
+                  semaforo: semaforo.label,
+                  semaforoClass: semaforo.className,
+                  crpDocumento: '',
+                  crpValor: 0,
+                });
+                return;
+              }
+
+              crpEntries.forEach(([crpDoc, crpValor]) => {
+                detailRows.push({
+                  depKey,
+                  dependenciaNumero: depNumero,
+                  dependenciaCentro: depCentro,
+                  dependenciaNombre: depNombre,
+                  dependenciaOriginal: depOriginal,
+                  cdpDocumento: cdpDoc,
+                  cdpValor: cdpGroup.valor,
+                  totalCrp,
+                  porcentaje,
+                  saldo,
+                  semaforo: semaforo.label,
+                  semaforoClass: semaforo.className,
+                  crpDocumento: crpDoc,
+                  crpValor,
+                });
+              });
+            });
+        });
+
+        return detailRows;
+      }
+
       function getCheckedValues(filterContainer) {
         return Array.from(filterContainer.querySelectorAll('input[type="checkbox"]:checked')).map(i => i.value);
       }
 
       function getSelections() {
         return {
-          deps: getCheckedValues(depContainer),
-          rubros: getCheckedValues(rubroContainer),
+          depNumeros: getCheckedValues(depNumeroContainer),
+          depCentros: getCheckedValues(depCentroContainer),
+          depNombres: getCheckedValues(depNombreContainer),
           cdps: getCheckedValues(cdpContainer),
           crps: getCheckedValues(crpContainer),
         };
       }
 
       function rowMatchesSelections(row, selections, excludeKey = '') {
-        if (excludeKey !== 'dep' && selections.deps.length && !selections.deps.includes(row.dependencia)) return false;
-        if (excludeKey !== 'rubro' && selections.rubros.length && !selections.rubros.includes(row.rubro)) return false;
+        if (excludeKey !== 'depNumero' && selections.depNumeros.length && !selections.depNumeros.includes(row.dependenciaNumero)) return false;
+        if (excludeKey !== 'depCentro' && selections.depCentros.length && !selections.depCentros.includes(row.dependenciaCentro)) return false;
+        if (excludeKey !== 'depNombre' && selections.depNombres.length && !selections.depNombres.includes(row.dependenciaNombre)) return false;
         if (excludeKey !== 'cdp' && selections.cdps.length) {
           const has = Array.from(row.cdpDocs).some(v => selections.cdps.includes(v));
           if (!has) return false;
@@ -2052,16 +2369,22 @@
       function rebuildDependentOptions() {
         const current = getSelections();
 
-        const depOptions = uniqueSorted(
+        const depNumeroOptions = uniqueSorted(
           baseRows
-            .filter(r => rowMatchesSelections(r, current, 'dep'))
-            .map(r => r.dependencia)
+            .filter(r => rowMatchesSelections(r, current, 'depNumero'))
+            .map(r => r.dependenciaNumero)
         );
 
-        const rubroOptions = uniqueSorted(
+        const depCentroOptions = uniqueSorted(
           baseRows
-            .filter(r => rowMatchesSelections(r, current, 'rubro'))
-            .map(r => r.rubro)
+            .filter(r => rowMatchesSelections(r, current, 'depCentro'))
+            .map(r => r.dependenciaCentro)
+        );
+
+        const depNombreOptions = uniqueSorted(
+          baseRows
+            .filter(r => rowMatchesSelections(r, current, 'depNombre'))
+            .map(r => r.dependenciaNombre)
         );
 
         const cdpOptions = uniqueSorted(
@@ -2078,17 +2401,20 @@
           true
         );
 
-        buildFilterDropdownWithSearch(depContainer, 'Todas las dependencias', depOptions, 'Buscar dependencia...');
-        buildFilterDropdownWithSearch(rubroContainer, 'Todos los rubros', rubroOptions, 'Buscar rubro...');
+        buildFilterDropdownWithSearch(depNumeroContainer, 'Todos los números', depNumeroOptions, 'Buscar número...');
+        buildFilterDropdownWithSearch(depCentroContainer, 'Todos los centros', depCentroOptions, 'Buscar centro...');
+        buildFilterDropdownWithSearch(depNombreContainer, 'Todas las dependencias', depNombreOptions, 'Buscar dependencia...');
         buildFilterDropdownWithSearch(cdpContainer, 'Todos los CDP', cdpOptions, 'Buscar CDP...');
         buildFilterDropdownWithSearch(crpContainer, 'Todos los CRP', crpOptions, 'Buscar CRP...');
 
-        const depPanel = depContainer.querySelector('.filter-panel');
-        const rubroPanel = rubroContainer.querySelector('.filter-panel');
+        const depNumeroPanel = depNumeroContainer.querySelector('.filter-panel');
+        const depCentroPanel = depCentroContainer.querySelector('.filter-panel');
+        const depNombrePanel = depNombreContainer.querySelector('.filter-panel');
         const cdpPanel = cdpContainer.querySelector('.filter-panel');
         const crpPanel = crpContainer.querySelector('.filter-panel');
-        if (depPanel) depPanel.onchange = applyCruceFilters;
-        if (rubroPanel) rubroPanel.onchange = applyCruceFilters;
+        if (depNumeroPanel) depNumeroPanel.onchange = applyCruceFilters;
+        if (depCentroPanel) depCentroPanel.onchange = applyCruceFilters;
+        if (depNombrePanel) depNombrePanel.onchange = applyCruceFilters;
         if (cdpPanel) cdpPanel.onchange = applyCruceFilters;
         if (crpPanel) crpPanel.onchange = applyCruceFilters;
       }
@@ -2106,18 +2432,31 @@
         pageRows.forEach(row => {
           const cdpDocs = Array.from(row.cdpDocs);
           const crpDocs = Array.from(row.crpDocs);
-          const linkedCdps = Array.from(row.crpLinkedCdps);
+          const porcentaje = getExecutionPercent(row.cdpValorActual, row.crpValorActual);
+          const semaforo = getSemaforoInfo(porcentaje);
           const div = document.createElement('div');
-          div.className = 'data-table-row data-table-row-cruce';
+          div.className = `data-table-row data-table-row-cruce${selectedCrossKeys.has(row.key) ? ' is-selected' : ''}`;
+          div.title = 'Haz clic para seleccionar o deseleccionar este cruce';
+          div.addEventListener('click', () => {
+            if (selectedCrossKeys.has(row.key)) {
+              selectedCrossKeys.delete(row.key);
+            } else {
+              selectedCrossKeys.add(row.key);
+            }
+            renderCruceRows();
+          });
           div.innerHTML = `
-            <span title="${row.dependencia}">${row.dependencia.slice(0, 40)}${row.dependencia.length > 40 ? '…' : ''}</span>
-            <span title="${row.rubro}">${row.rubro.slice(0, 24)}${row.rubro.length > 24 ? '…' : ''}</span>
+            <span title="${row.dependenciaNumero}">${row.dependenciaNumero}</span>
+            <span title="${row.dependenciaCentro}">${row.dependenciaCentro}</span>
+            <span title="${row.dependenciaNombre}">${row.dependenciaNombre}</span>
             <span>$ ${formatMoney(row.ejeApropiacion)}</span>
             <span>$ ${formatMoney(row.cdpValorActual)}</span>
             <span>$ ${formatMoney(row.crpValorActual)}</span>
-            <span title="${cdpDocs.join(', ')}">${summarizeNumberList(cdpDocs)}</span>
-            <span title="${crpDocs.join(', ')}">${summarizeNumberList(crpDocs)}</span>
-            <span title="${linkedCdps.join(', ')}">${summarizeNumberList(linkedCdps)}</span>
+            <span title="${cdpDocs.join(', ')}">${cdpDocs.length}</span>
+            <span title="${crpDocs.join(', ')}">${crpDocs.length}</span>
+            <span>
+              <span class="status-badge ${semaforo.className}" title="${formatPercentValue(porcentaje)} ejecutado">${formatPercentValue(porcentaje)} ${semaforo.label}</span>
+            </span>
           `;
           bodyEl.appendChild(div);
         });
@@ -2140,14 +2479,16 @@
       function applyCruceFilters() {
         rebuildDependentOptions();
         const selections = getSelections();
-        const selDeps = new Set(selections.deps);
-        const selRubros = new Set(selections.rubros);
+        const selNumeros = new Set(selections.depNumeros);
+        const selCentros = new Set(selections.depCentros);
+        const selNombres = new Set(selections.depNombres);
         const selCdps = new Set(selections.cdps);
         const selCrps = new Set(selections.crps);
 
         filteredRows = baseRows.filter(row => {
-          if (selDeps.size && !selDeps.has(row.dependencia)) return false;
-          if (selRubros.size && !selRubros.has(row.rubro)) return false;
+          if (selNumeros.size && !selNumeros.has(row.dependenciaNumero)) return false;
+          if (selCentros.size && !selCentros.has(row.dependenciaCentro)) return false;
+          if (selNombres.size && !selNombres.has(row.dependenciaNombre)) return false;
 
           if (selCdps.size) {
             const hasCdp = Array.from(row.cdpDocs).some(v => selCdps.has(v));
@@ -2161,11 +2502,11 @@
 
           if (searchTerm) {
             const haystack = [
-              row.dependencia,
-              row.rubro,
+              row.dependenciaNumero,
+              row.dependenciaCentro,
+              row.dependenciaNombre,
               ...Array.from(row.cdpDocs),
               ...Array.from(row.crpDocs),
-              ...Array.from(row.crpLinkedCdps),
             ]
               .map(v => (v || '').toString().toLowerCase())
               .join(' ');
@@ -2180,7 +2521,7 @@
         const totalEje = filteredRows.reduce((acc, row) => acc + (Number(row.ejeApropiacion) || 0), 0);
         const totalCdp = filteredRows.reduce((acc, row) => acc + (Number(row.cdpValorActual) || 0), 0);
         const totalCrp = filteredRows.reduce((acc, row) => acc + (Number(row.crpValorActual) || 0), 0);
-        summaryEl.textContent = `Cruces: ${filteredRows.length}. EJE aprop. vigente: $ ${formatMoney(totalEje)}. Apropiación valor actual: $ ${formatMoney(totalCdp)}. Ejecución valor actual: $ ${formatMoney(totalCrp)}.`;
+        summaryEl.textContent = `Cruces: ${filteredRows.length}. Seleccionados: ${selectedCrossKeys.size}. EJE aprop. vigente: $ ${formatMoney(totalEje)}. Apropiación valor actual: $ ${formatMoney(totalCdp)}. Ejecución valor actual: $ ${formatMoney(totalCrp)}.`;
         renderCruceRows();
       }
 
@@ -2192,28 +2533,103 @@
           return items.join(' | ');
         };
 
+        const formatCdpToCrp = (row) => {
+          const mapping = [];
+          const allCrps = Array.isArray(crpDataCache) ? crpDataCache : [];
+          const rowKey = row.key;
+          Array.from(row.cdpDocs || []).sort((a,b)=>a.localeCompare(b,'es',{numeric:true})).forEach(cdp => {
+            const linked = allCrps
+              .filter(r => {
+                const dep = (r.dependencia_descripcion || '').trim()
+                  ? `${r.dependencia || ''} - ${r.dependencia_descripcion || ''}`
+                  : (r.dependencia || '');
+                const key = dependencyJoinKey(dep);
+                return String(r.cdp || '').trim() === String(cdp).trim() && key === rowKey;
+              })
+              .map(r => (r.numero_documento || '').toString().trim())
+              .filter(Boolean);
+            mapping.push(`CDP ${cdp}: ${linked.length ? linked.join(', ') : 'sin CRP'}`);
+          });
+          return mapping.join(' | ');
+        };
+
+        const sourceRows = cruceFilteredDataCache || [];
+        const totalGeneralCdp = sourceRows.reduce((acc, row) => acc + (Number(row.cdpValorActual) || 0), 0);
+        const totalGeneralCrp = sourceRows.reduce((acc, row) => acc + (Number(row.crpValorActual) || 0), 0);
+
+        const rowsForExport = sourceRows.map(row => ({
+          ...row,
+        }));
+
+        rowsForExport.push({
+          dependenciaNumero: 'TOTAL GENERAL',
+          dependenciaCentro: '',
+          dependenciaNombre: '',
+          dependenciaOriginal: 'TOTAL GENERAL',
+          ejeApropiacion: sourceRows.reduce((acc, row) => acc + (Number(row.ejeApropiacion) || 0), 0),
+          cdpValorActual: totalGeneralCdp,
+          crpValorActual: totalGeneralCrp,
+          cdpDocs: new Set(),
+          crpDocs: new Set(),
+          cdpValores: new Map(),
+          crpValores: new Map(),
+        });
+
         const columns = [
-          { key: 'dependencia', header: 'Dependencia' },
-          { key: 'rubro', header: 'Rubro' },
+          { key: 'dependenciaNumero', header: 'Dep. número' },
+          { key: 'dependenciaCentro', header: 'Centro' },
+          { key: 'dependenciaNombre', header: 'Dependencia' },
           { key: 'ejeApropiacion', header: 'Aprop. vigente EJE' },
           { key: 'cdpValorActual', header: 'Valor actual Apropiación' },
           { key: 'crpValorActual', header: 'Valor actual Ejecución' },
+          { key: 'diferenciaCdpVsCrpFormula', header: 'Diferencia CDP - CRP (fórmula)', getter: (_row, excelRow) => ({ formula: `E${excelRow}-F${excelRow}` }) },
           { key: 'cdpCount', header: 'Cantidad CDP', getter: row => row.cdpDocs.size },
           { key: 'crpCount', header: 'Cantidad CRP', getter: row => row.crpDocs.size },
           { key: 'cdpList', header: 'CDP (todos)', getter: row => Array.from(row.cdpDocs).sort((a, b) => a.localeCompare(b, 'es', { numeric: true })).join(', ') },
           { key: 'cdpValores', header: 'CDP y valor actual', getter: row => formatDocValues(row.cdpValores) },
           { key: 'crpList', header: 'CRP (todos)', getter: row => Array.from(row.crpDocs).sort((a, b) => a.localeCompare(b, 'es', { numeric: true })).join(', ') },
           { key: 'crpValores', header: 'CRP y valor actual', getter: row => formatDocValues(row.crpValores) },
-          { key: 'linkedList', header: 'Vínculo CRP->CDP (todos)', getter: row => Array.from(row.crpLinkedCdps).sort((a, b) => a.localeCompare(b, 'es', { numeric: true })).join(', ') },
+          { key: 'cdpCrpMap', header: 'CDP -> CRP(s)', getter: row => formatCdpToCrp(row) },
         ];
 
         exportRowsToExcel({
-          rows: cruceFilteredDataCache,
+          rows: rowsForExport,
           columns,
           filename: 'cruce_filtrado.xlsx',
           sheetName: 'Cruce',
-          numericKeys: ['ejeApropiacion', 'cdpValorActual', 'crpValorActual'],
-          colWidths: [34, 20, 20, 22, 22, 14, 14, 34, 45, 34, 45, 38],
+          numericKeys: ['ejeApropiacion', 'cdpValorActual', 'crpValorActual', 'diferenciaCdpVsCrpFormula'],
+          colWidths: [14, 28, 36, 20, 22, 22, 24, 14, 14, 34, 45, 34, 45, 48],
+        });
+      };
+
+      detailExportBtn.onclick = () => {
+        const detailRows = getDetailRowsForSelectedOrFiltered();
+        if (!detailRows.length) {
+          alert('No hay cruces con detalle para exportar con los filtros actuales.');
+          return;
+        }
+
+        const columns = [
+          { key: 'dependenciaNumero', header: 'Dep. número' },
+          { key: 'dependenciaCentro', header: 'Centro' },
+          { key: 'dependenciaNombre', header: 'Dependencia' },
+          { key: 'cdpDocumento', header: 'CDP' },
+          { key: 'cdpValor', header: 'Valor CDP' },
+          { key: 'totalCrp', header: 'Total CRP del CDP' },
+          { key: 'porcentaje', header: '% ejecutado', getter: row => formatPercentValue(row.porcentaje) },
+          { key: 'saldo', header: 'Saldo por ejecutar' },
+          { key: 'semaforo', header: 'Semáforo' },
+          { key: 'crpDocumento', header: 'CRP' },
+          { key: 'crpValor', header: 'Valor CRP' },
+        ];
+
+        exportRowsToExcel({
+          rows: detailRows,
+          columns,
+          filename: 'cruce_detallado.xlsx',
+          sheetName: 'Detalle',
+          numericKeys: ['cdpValor', 'totalCrp', 'porcentaje', 'saldo', 'crpValor'],
+          colWidths: [14, 28, 36, 16, 18, 20, 14, 18, 14, 16, 16],
         });
       };
 
@@ -2373,8 +2789,9 @@
       });
 
       rows.forEach((row, idx) => {
+        const excelRowNumber = idx + 2;
         const values = columns.map(c => {
-          const v = typeof c.getter === 'function' ? c.getter(row) : row[c.key];
+          const v = typeof c.getter === 'function' ? c.getter(row, excelRowNumber) : row[c.key];
           return v === null || v === undefined ? '' : v;
         });
         const excelRow = sheet.addRow(values);
@@ -2392,7 +2809,7 @@
         }
         numericColIndexes.forEach(colIndex => {
           const cell = excelRow.getCell(colIndex);
-          if (typeof cell.value === 'number') {
+          if (cell.value !== null && cell.value !== undefined && cell.value !== '') {
             cell.numFmt = '#,##0.00';
           }
         });
@@ -2450,7 +2867,10 @@
             { key: 'valor_operaciones', header: 'Valor operaciones' },
             { key: 'valor_actual', header: 'Valor actual' },
             { key: 'saldo_por_comprometer', header: 'Saldo por comprometer' },
-            { key: 'objeto', header: 'Objeto' },
+            { key: 'objeto', header: 'Objeto', getter: row => {
+              const o = (row.objeto || '').toString();
+              return o.includes(':') ? o.split(':')[0].trim() : o.trim();
+            } },
             { key: 'solicitud_cdp', header: 'Solicitud CDP' },
             { key: 'fecha_corte', header: 'Fecha corte' },
           ];

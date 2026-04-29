@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from .routers import cdp, crp, eje
+from .routers import cdp, crp, eje, admin
 
 app = FastAPI(title="API Presupuesto")
 
@@ -21,6 +21,7 @@ app.add_middleware(
 app.include_router(cdp.router, prefix="/cdp", tags=["CDP"])
 app.include_router(crp.router, prefix="/crp", tags=["CRP"])
 app.include_router(eje.router, prefix="/eje", tags=["EJE"])
+app.include_router(admin.router, prefix="/admin", tags=["Admin"])
 
 
 @app.get("/")
