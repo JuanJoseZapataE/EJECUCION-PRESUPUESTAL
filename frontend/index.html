@@ -99,22 +99,40 @@
     .data-table-header { background: #f3f4f6; color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); }
     .data-table-row:nth-child(even) { background: #f9fafb; }
     .data-table-row:nth-child(odd) { background: #ffffff; }
-    .data-table-header-eje, .data-table-row-eje { grid-template-columns: 1.25fr 1.15fr 1fr 0.75fr 1fr; }
+    .data-table-header-eje, .data-table-row-eje { grid-template-columns: 1.1fr 1fr 0.85fr 0.6fr 1fr 1fr; }
     .data-table-header-5, .data-table-row-5 { grid-template-columns: 0.7fr 0.8fr 1.6fr 1fr 1fr 0.7fr; }
+    .data-table-header-crp, .data-table-row-crp { grid-template-columns: 0.65fr 1.3fr 0.9fr 0.85fr 1.1fr 0.85fr 0.55fr 0.85fr; }
+    .data-table-row-synthetic { background: #fff7ed !important; font-style: italic; }
     #cruce-table-body { display: grid; grid-template-columns: 1fr; }
     .data-table { width: 100%; }
-    .data-table-header-cruce { display: grid; grid-template-columns: 0.8fr 1fr 1.6fr 1fr 1fr 0.9fr 0.8fr 0.8fr; width: 100%; box-sizing: border-box; padding: 6px 8px; font-size: 0.72rem; }
-    .data-table-row-cruce { display: grid; grid-template-columns: 0.8fr 1fr 1.6fr 1fr 1fr 0.9fr 0.8fr 0.8fr 0.8fr; width: 100%; box-sizing: border-box; padding: 6px 8px; font-size: 0.78rem; align-items: center; cursor: pointer; }
+    .data-table-header-cruce, .data-table-row-cruce {
+      display: grid;
+      grid-template-columns: 0.75fr 1fr 1.4fr 1fr 1.3fr 0.95fr 0.95fr 0.95fr 0.95fr 0.6fr 0.5fr 0.7fr;
+      width: 100%; box-sizing: border-box; padding: 8px 10px; gap: 6px;
+    }
+    .data-table-header-cruce { font-size: 0.72rem; }
+    .data-table-row-cruce { font-size: 0.78rem; align-items: center; cursor: pointer; }
     .data-table-row-cruce > span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .data-table-row-cruce > span:nth-child(2),
-    .data-table-row-cruce > span:nth-child(3) {
+    .data-table-row-cruce > span:nth-child(3),
+    .data-table-row-cruce > span:nth-child(4),
+    .data-table-row-cruce > span:nth-child(6) {
       white-space: normal;
       overflow-wrap: anywhere;
       word-break: break-word;
       line-height: 1.2;
     }
-    .data-table-row-cruce.is-selected { background: #dbeafe !important; box-shadow: inset 0 0 0 1px #60a5fa; }
-    .status-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 74px; padding: 2px 8px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; border: 1px solid transparent; }
+    .data-table-row-cruce > span:nth-child(5) {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .data-table-row-cruce.cruce-row-green { background: #dcfce7 !important; }
+    .data-table-row-cruce.cruce-row-yellow { background: #fef3c7 !important; }
+    .data-table-row-cruce.cruce-row-red { background: #fee2e2 !important; }
+    .data-table-row-cruce.is-uncovered { font-style: italic; }
+    .data-table-row-cruce.is-selected { box-shadow: inset 0 0 0 2px #60a5fa !important; }
+    .cruce-pct { font-weight: 700; font-size: 0.78rem; }
+    .status-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 52px; padding: 3px 8px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; border: 1px solid transparent; }
     .status-green { background: #dcfce7; color: #166534; border-color: #86efac; }
     .status-yellow { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
     .status-red { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
@@ -150,6 +168,7 @@
     <nav class="navbar">
       <button class="nav-btn active" id="nav-dashboard" type="button">Dashboard</button>
       <button class="nav-btn" id="nav-upload" type="button">Subida de datos</button>
+      <button class="nav-btn" id="nav-seguimiento-metas" type="button">Seguimiento metas</button>
     </nav>
 
     <main id="view-dashboard">
@@ -177,23 +196,27 @@
           </div>
 
           <div class="metric-row">
-            <span class="muted">Total Apropiación (valor actual)</span>
+            <span class="muted">TOTAL CDP</span>
             <strong id="resumen-cdp-total">&mdash;</strong>
           </div>
           <div class="metric-row">
-            <span class="muted">Total Ejecución (valor actual)</span>
+            <span class="muted">TOTAL CRP</span>
             <strong id="resumen-crp-total">&mdash;</strong>
           </div>
           <div class="metric-row">
-            <span class="muted">Total EJE (apropiación vigente, filas resumen)</span>
+            <span class="muted">TOTAL EJE</span>
             <strong id="resumen-eje-total">&mdash;</strong>
           </div>
           <div class="metric-row">
-            <span class="muted">Fecha de corte Apropiación</span>
+            <span class="muted">Total obligaciones pagada EJE</span>
+            <strong id="resumen-oblig-pagadas-total">&mdash;</strong>
+          </div>
+          <div class="metric-row">
+            <span class="muted">Fecha de corte CDP</span>
             <strong id="resumen-cdp-fecha-corte">&mdash;</strong>
           </div>
           <div class="metric-row">
-            <span class="muted">Fecha de corte Ejecución</span>
+            <span class="muted">Fecha de corte CRP</span>
             <strong id="resumen-crp-fecha-corte">&mdash;</strong>
           </div>
           <div class="metric-row">
@@ -314,8 +337,8 @@
 
           <div class="tab-switcher">
             <button type="button" class="tab-btn active" data-table="eje">EJE</button>
-            <button type="button" class="tab-btn" data-table="cdp">Apropiación</button>
-            <button type="button" class="tab-btn" data-table="crp">Ejecución</button>
+            <button type="button" class="tab-btn" data-table="cdp">CDP</button>
+            <button type="button" class="tab-btn" data-table="crp">CRP</button>
             <button type="button" class="tab-btn" data-table="cruce">Cruce</button>
           </div>
 
@@ -353,6 +376,7 @@
               <span>Recurso</span>
               <span>SIIF</span>
               <span>Apropiación vigente</span>
+              <span>Oblig. pagadas</span>
             </div>
             <div id="eje-pivot-body"></div>
             <div class="pagination" id="eje-pivot-pagination">
@@ -442,18 +466,29 @@
                 <label class="filter-label" for="crp-filter-cdp">CDP</label>
                 <div id="crp-filter-cdp" class="filter-dropdown"></div>
               </div>
+              <div class="filter-group">
+                <label class="filter-label" for="crp-filter-cobertura">Cobertura CDP / CRP</label>
+                <select id="crp-filter-cobertura" class="filter-text" style="padding: 8px 10px; width: 100%;">
+                  <option value="all">Todos</option>
+                  <option value="sin_cdp_crp">Solo sin CDP / CRP</option>
+                  <option value="con_cdp_crp">Con CDP o CRP</option>
+                </select>
+              </div>
             </div>
             <p class="muted" id="crp-table-summary">Filtra la tabla de Ejecución y visualiza la sumatoria de valor actual.</p>
             <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:6px; gap:8px;">
               <button type="button" class="btn" id="crp-export-btn">Exportar</button>
             </div>
             <div class="data-table" id="crp-table" aria-label="Detalle Ejecución">
-              <div class="data-table-header data-table-header-5">
+              <div class="data-table-header data-table-header-crp">
                 <span>Número documento</span>
                 <span>Dependencia</span>
                 <span>Rubro</span>
+                <span>Identificación</span>
+                <span>Razón social</span>
                 <span>Valor actual</span>
                 <span>Apropiación</span>
+                <span>Oblig. pagadas</span>
               </div>
               <div id="crp-table-body"></div>
               <div class="pagination" id="crp-pagination">
@@ -468,7 +503,7 @@
           </div>
 
           <div id="table-cruce-container" style="display:none;">
-            <p class="muted">Cruce de EJE, Apropiación y Ejecución por dependencia y rubro.</p>
+            <p class="muted">Cruce de EJE, Apropiación y Ejecución por dependencia, rubro y CDP (cada CDP con su concepto SENA y cantidad de CRP).</p>
             <div class="filter-group" style="margin-bottom:10px;">
               <label class="filter-label" for="cruce-search-input">Buscar en cruce por dependencia, rubro, CDP o CRP</label>
               <input id="cruce-search-input" type="text" class="filter-text" placeholder="Escribe una palabra clave..." />
@@ -494,6 +529,14 @@
                 <label class="filter-label" for="cruce-filter-crp">CRP</label>
                 <div id="cruce-filter-crp" class="filter-dropdown"></div>
               </div>
+              <div class="filter-group">
+                <label class="filter-label" for="cruce-filter-cobertura">Cobertura CDP / CRP</label>
+                <select id="cruce-filter-cobertura" class="filter-text" style="padding: 8px 10px; width: 100%;">
+                  <option value="all">Todos</option>
+                  <option value="sin_cdp_crp">Solo sin CDP / CRP</option>
+                  <option value="con_cdp_crp">Con CDP o CRP</option>
+                </select>
+              </div>
             </div>
 
             <p class="muted" id="cruce-table-summary">Cruza apropiación vigente EJE, valor actual Apropiación y valor actual Ejecución.</p>
@@ -508,11 +551,14 @@
                 <span>Dep. número</span>
                 <span>Centro</span>
                 <span>Dependencia</span>
+                <span>Rubro</span>
                 <span>Aprop. vigente EJE</span>
+                <span>Concepto SENA</span>
                 <span>Valor actual Aprop.</span>
                 <span>Valor actual Ejec.</span>
+                <span>Oblig. pagadas</span>
                 <span>CDP</span>
-                <span>CRP</span>
+                <span>N° de crp</span>
                 <span>% / Semáforo</span>
               </div>
               <div id="cruce-table-body"></div>
@@ -619,6 +665,16 @@
         </div>
       </section>
     </main>
+
+    <main id="view-seguimiento-metas" style="display:none; margin-top:4px;">
+      <section class="card" style="grid-column: 1 / -1;">
+        <div class="card-inner">
+          <div class="card-header">
+            <div class="card-title">Seguimiento metas</div>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -630,8 +686,10 @@
     let ejeDataCache = [];
     let cdpDataCache = [];
     let crpDataCache = [];
+    let crpDisplayDataCache = [];
     let cdpFilteredDataCache = [];
     let crpFilteredDataCache = [];
+    let crpApplyFiltersFn = null;
     let cruceDataCache = [];
     let cruceFilteredDataCache = [];
     let cdpCurrentPage = 1;
@@ -849,6 +907,10 @@
         if (resumenEjeTotalEl) {
           resumenEjeTotalEl.textContent = '$ ' + formatMoney(totalApropiacion);
         }
+        const resumenObligPagadasEl = document.getElementById('resumen-oblig-pagadas-total');
+        if (resumenObligPagadasEl) {
+          resumenObligPagadasEl.textContent = '$ ' + formatMoney(totals.total_ordenes_pago_dep_gstos || 0);
+        }
         const resumenEjeFechaCorteEl = document.getElementById('resumen-eje-fecha-corte');
         if (resumenEjeFechaCorteEl) {
           const ejeCutoff = filteredData.reduce((acc, row) => {
@@ -899,6 +961,8 @@
         renderEjeChart(totals);
 
         setupEjePivot(resumenRows);
+        rebuildCrpDisplayCache();
+        if (crpApplyFiltersFn) crpApplyFiltersFn();
         setupCruceTable();
       } catch (err) {
         ejeDataCache = [];
@@ -906,6 +970,10 @@
         const resumenEjeTotalEl = document.getElementById('resumen-eje-total');
         if (resumenEjeTotalEl) {
           resumenEjeTotalEl.textContent = 'Error';
+        }
+        const resumenObligPagadasEl = document.getElementById('resumen-oblig-pagadas-total');
+        if (resumenObligPagadasEl) {
+          resumenObligPagadasEl.textContent = 'Error';
         }
         errorEl.style.display = 'block';
         errorEl.textContent = 'Error cargando datos de /eje: ' + err.message;
@@ -974,6 +1042,7 @@
         cdpTotalValorActual = cdpTotal;
         crpTotalValorActual = crpTotalActual;
         renderTotalsComparisonChart();
+        rebuildCrpDisplayCache();
         setupCdpFilters();
         setupCrpFilters();
         setupCruceTable();
@@ -1140,22 +1209,32 @@
       const pageRows = dataSource.slice(startIdx, endIdx);
 
       const totalValorActual = dataSource.reduce((acc, row) => acc + (Number(row.valor_actual) || 0), 0);
+      const totalObligPagadas = dataSource.reduce((acc, row) => acc + (Number(row.crp_oblig_pagadas) || 0), 0);
       if (summaryEl) {
-        summaryEl.textContent = `Coinciden con filtros: ${total}. Sumatoria valor actual: $ ${formatMoney(totalValorActual)}.`;
+        summaryEl.textContent = `Coinciden con filtros: ${total}. Sumatoria valor actual: $ ${formatMoney(totalValorActual)}. Obligaciones pagadas (CRP): $ ${formatMoney(totalObligPagadas)}.`;
       }
 
       pageRows.forEach(row => {
         const div = document.createElement('div');
-        div.className = 'data-table-row data-table-row-5';
+        div.className = `data-table-row data-table-row-crp${row.isSynthetic ? ' data-table-row-synthetic' : ''}`;
         const dep = row.dependencia || '';
         const depDesc = row.dependencia_descripcion || '';
         const depFull = depDesc ? `${dep} - ${depDesc}` : dep;
+        const cdpLabel = row.isSynthetic
+          ? (row.syntheticNote || 'Sin CDP / CRP')
+          : (row.cdp != null ? row.cdp : '');
+        const razonSocial = row.isSynthetic
+          ? (row.syntheticNote || 'Sin CDP / CRP')
+          : (row.nombre_razon_social || '');
         div.innerHTML = `
-          <span>${row.numero_documento != null ? row.numero_documento : ''}</span>
+          <span>${row.isSynthetic ? '—' : (row.numero_documento != null ? row.numero_documento : '')}</span>
           <span title="${depFull}">${depFull}</span>
           <span>${row.rubro || ''}</span>
+          <span>${row.identificacion || ''}</span>
+          <span title="${razonSocial}">${razonSocial.slice(0, 28)}${razonSocial.length > 28 ? '…' : ''}</span>
           <span>$ ${formatMoney(row.valor_actual)}</span>
-          <span>${row.cdp != null ? row.cdp : ''}</span>
+          <span>${cdpLabel}</span>
+          <span>$ ${formatMoney(row.crp_oblig_pagadas)}</span>
         `;
         body.appendChild(div);
       });
@@ -1386,6 +1465,7 @@
       const rubroContainer = document.getElementById('crp-filter-rubro');
       const recursoContainer = document.getElementById('crp-filter-recurso');
       const cdpContainer = document.getElementById('crp-filter-cdp');
+      const coberturaSelect = document.getElementById('crp-filter-cobertura');
       const searchInput = document.getElementById('crp-search-input');
       if (!depContainer || !rubroContainer || !recursoContainer || !cdpContainer || !searchInput) return;
 
@@ -1411,7 +1491,9 @@
           depFull: depDesc ? `${dep} - ${depDesc}` : dep,
           rubro: row.rubro || '',
           recurso: row.recurso || '',
-          cdp: row.cdp !== null && row.cdp !== undefined ? String(row.cdp).trim() : '',
+          cdp: row.isSynthetic
+            ? (row.syntheticNote || 'Sin CDP / CRP')
+            : (row.cdp !== null && row.cdp !== undefined ? String(row.cdp).trim() : ''),
         };
       }
 
@@ -1431,28 +1513,28 @@
         const current = getSelections();
 
         const depOptions = uniqueSorted(
-          crpDataCache
+          crpDisplayDataCache
             .map(getRowValues)
             .filter(v => rowMatchesSelections(v, current, 'dep'))
             .map(v => v.depFull)
         );
 
         const rubroOptions = uniqueSorted(
-          crpDataCache
+          crpDisplayDataCache
             .map(getRowValues)
             .filter(v => rowMatchesSelections(v, current, 'rubro'))
             .map(v => v.rubro)
         );
 
         const recursoOptions = uniqueSorted(
-          crpDataCache
+          crpDisplayDataCache
             .map(getRowValues)
             .filter(v => rowMatchesSelections(v, current, 'recurso'))
             .map(v => v.recurso)
         );
 
         const cdpOptions = uniqueSorted(
-          crpDataCache
+          crpDisplayDataCache
             .map(getRowValues)
             .filter(v => rowMatchesSelections(v, current, 'cdp'))
             .map(v => v.cdp),
@@ -1481,20 +1563,21 @@
         const selRubros = new Set(selections.rubros);
         const selRecursos = new Set(selections.recursos);
         const selCdps = new Set(selections.cdps);
-        crpFilteredDataCache = crpDataCache.filter(row => {
+        crpFilteredDataCache = crpDisplayDataCache.filter(row => {
           const dep = row.dependencia || '';
           const depDesc = row.dependencia_descripcion || '';
           const depFull = depDesc ? `${dep} - ${depDesc}` : dep;
           const rubro = row.rubro || '';
           const recurso = row.recurso || '';
-          const cdp = row.cdp !== null && row.cdp !== undefined
-            ? String(row.cdp).trim()
-            : '';
+          const cdp = row.isSynthetic
+            ? (row.syntheticNote || 'Sin CDP / CRP')
+            : (row.cdp !== null && row.cdp !== undefined ? String(row.cdp).trim() : '');
 
           if (selDeps.size && !selDeps.has(depFull)) return false;
           if (selRubros.size && !selRubros.has(rubro)) return false;
           if (selRecursos.size && !selRecursos.has(recurso)) return false;
           if (selCdps.size && !selCdps.has(cdp)) return false;
+          if (!matchesCoberturaFilter(row, coberturaSelect ? coberturaSelect.value : 'all', 'crp')) return false;
 
           if (searchTerm) {
             const haystack = [
@@ -1504,6 +1587,9 @@
               rubro,
               row.cdp,
               row.descripcion,
+              row.identificacion,
+              row.nombre_razon_social,
+              row.syntheticNote,
             ]
               .map(v => (v || '').toString().toLowerCase())
               .join(' ');
@@ -1522,7 +1608,12 @@
         applyFilters();
       };
 
-      crpFilteredDataCache = crpDataCache.slice();
+      if (coberturaSelect) {
+        coberturaSelect.onchange = applyFilters;
+      }
+
+      crpApplyFiltersFn = applyFilters;
+      rebuildCrpDisplayCache();
       applyFilters();
     }
 
@@ -1663,6 +1754,7 @@
             <span>${row.recurso || ''}</span>
             <span>${row.rec ?? ''}</span>
             <span>$ ${formatMoney(row.apropiacion_vigente_dep_gsto)}</span>
+            <span>$ ${formatMoney(row.total_ordenes_pago_dep_gstos)}</span>
           `;
           bodyEl.appendChild(div);
         });
@@ -1712,11 +1804,12 @@
 
         const filteredTotals = buildEjeTotals(currentFiltered);
         const totalApropiacion = filteredTotals.apropiacion_vigente_dep_gsto || 0;
+        const totalObligPagadas = filteredTotals.total_ordenes_pago_dep_gstos || 0;
 
         // Mantener el gráfico alineado con los filtros activos de la tabla EJE.
         renderEjeChart(filteredTotals);
 
-        summaryEl.textContent = `Filas resumen: ${resumenRows.length}. Coinciden con filtros: ${currentFiltered.length}. Total apropiación: $ ${formatMoney(totalApropiacion)}.`;
+        summaryEl.textContent = `Filas resumen: ${resumenRows.length}. Coinciden con filtros: ${currentFiltered.length}. Total apropiación: $ ${formatMoney(totalApropiacion)}. Obligaciones pagadas: $ ${formatMoney(totalObligPagadas)}.`;
       }
 
       if (searchInput) {
@@ -2089,6 +2182,267 @@
       return normalizeJoinValue(value).replace(/\s+/g, '');
     }
 
+    function getCdpDepFull(row) {
+      const dep = row.dependencia || '';
+      const depDesc = (row.dependencia_descripcion || '').trim();
+      return depDesc ? `${dep} - ${depDesc}` : dep;
+    }
+
+    function shortObjeto(objeto) {
+      const objetoFull = (objeto || '').toString();
+      return objetoFull.includes(':') ? objetoFull.split(':')[0].trim() : objetoFull.trim();
+    }
+
+    function getCrpObligPagadas(row) {
+      const valorActual = Number(row.valor_actual) || 0;
+      const saldo = Number(row.saldo_por_utilizar) || 0;
+      return Math.max(0, valorActual - saldo);
+    }
+
+    function sumCrpObligPagadas(rows) {
+      return (rows || []).reduce((sum, row) => sum + getCrpObligPagadas(row), 0);
+    }
+
+    function buildEjeRubroGroups() {
+      const groups = new Map();
+      const ejeRows = (ejeDataCache || []).filter(r => r.es_resumen === true || r.es_resumen === 1);
+      ejeRows.forEach(row => {
+        const depOriginal = row.dependecia_de_afectacion_de_gastos || '';
+        const depKey = dependencyJoinKey(depOriginal);
+        const rubro = buildRubroCodigo(row) || row.concepto || '';
+        const rubroKey = rubroJoinKey(rubro);
+        const key = `${depKey}|${rubroKey}`;
+        if (!groups.has(key)) {
+          const parts = parseDependencyParts(depOriginal);
+          groups.set(key, {
+            key,
+            depKey,
+            depOriginal,
+            depCodigo: parts.numero || '',
+            depNombre: parts.nombre || depOriginal,
+            rubro,
+            rubroKey,
+            ejeApropiacion: 0,
+            ejeObligPagadas: 0,
+          });
+        }
+        const group = groups.get(key);
+        group.ejeApropiacion += Number(row.apropiacion_vigente_dep_gsto) || 0;
+        group.ejeObligPagadas += Number(row.total_ordenes_pago_dep_gstos) || 0;
+      });
+      return groups;
+    }
+
+    function rebuildCrpDisplayCache() {
+      const groups = buildEjeRubroGroups();
+      const displayRows = (crpDataCache || []).map(row => ({
+        ...row,
+        isSynthetic: false,
+        crp_oblig_pagadas: getCrpObligPagadas(row),
+      }));
+
+      groups.forEach(group => {
+        const matchingCdps = (cdpDataCache || []).filter(cdp =>
+          dependencyJoinKey(getCdpDepFull(cdp)) === group.depKey && rubroJoinKey(cdp.rubro) === group.rubroKey
+        );
+        const matchingCrps = (crpDataCache || []).filter(crp =>
+          dependencyJoinKey(getCdpDepFull(crp)) === group.depKey && rubroJoinKey(crp.rubro) === group.rubroKey
+        );
+        const cdpTotal = matchingCdps.reduce((sum, row) => sum + (Number(row.valor_actual) || 0), 0);
+        const hasCrp = matchingCrps.length > 0;
+        const uncovered = group.ejeApropiacion - cdpTotal;
+
+        if (!hasCrp && group.ejeApropiacion > 0) {
+          displayRows.push({
+            isSynthetic: true,
+            numero_documento: null,
+            dependencia: group.depCodigo,
+            dependencia_descripcion: group.depNombre,
+            rubro: group.rubro,
+            identificacion: '',
+            nombre_razon_social: '',
+            valor_actual: matchingCdps.length === 0 ? group.ejeApropiacion : cdpTotal,
+            cdp: null,
+            syntheticNote: matchingCdps.length === 0 ? 'Sin CDP / CRP' : 'Sin CRP',
+            crp_oblig_pagadas: 0,
+          });
+        }
+
+        if (hasCrp && uncovered > 0.005) {
+          displayRows.push({
+            isSynthetic: true,
+            numero_documento: null,
+            dependencia: group.depCodigo,
+            dependencia_descripcion: group.depNombre,
+            rubro: group.rubro,
+            identificacion: '',
+            nombre_razon_social: '',
+            valor_actual: uncovered,
+            cdp: null,
+            syntheticNote: 'Sin CDP / CRP (porción no cubierta)',
+            crp_oblig_pagadas: 0,
+          });
+        } else if (!hasCrp && uncovered > 0.005 && matchingCdps.length > 0) {
+          displayRows.push({
+            isSynthetic: true,
+            numero_documento: null,
+            dependencia: group.depCodigo,
+            dependencia_descripcion: group.depNombre,
+            rubro: group.rubro,
+            identificacion: '',
+            nombre_razon_social: '',
+            valor_actual: uncovered,
+            cdp: null,
+            syntheticNote: 'Sin CDP / CRP (porción no cubierta)',
+            crp_oblig_pagadas: 0,
+          });
+        }
+      });
+
+      crpDisplayDataCache = displayRows;
+    }
+
+    function buildCruceBaseRows() {
+      const rows = [];
+      const groups = buildEjeRubroGroups();
+
+      groups.forEach(group => {
+        const parts = parseDependencyParts(group.depOriginal);
+        const codigo = group.depCodigo || parts.numero || group.depKey;
+        const centro = getCentroNameByCodigo(codigo);
+        const nombre = group.depNombre || parts.nombre || group.depOriginal;
+
+        const matchingCdps = (cdpDataCache || []).filter(cdp =>
+          dependencyJoinKey(getCdpDepFull(cdp)) === group.depKey && rubroJoinKey(cdp.rubro) === group.rubroKey
+        );
+
+        const cdpByDoc = new Map();
+        matchingCdps.forEach(cdp => {
+          const doc = cdp.numero_documento !== null && cdp.numero_documento !== undefined
+            ? String(cdp.numero_documento).trim()
+            : '';
+          if (!doc) return;
+          if (!cdpByDoc.has(doc)) {
+            cdpByDoc.set(doc, { valor: 0, rows: [], objeto: '' });
+          }
+          const entry = cdpByDoc.get(doc);
+          entry.valor += Number(cdp.valor_actual) || 0;
+          entry.rows.push(cdp);
+          if (!entry.objeto && cdp.objeto) entry.objeto = shortObjeto(cdp.objeto);
+        });
+
+        let cdpTotal = 0;
+        cdpByDoc.forEach((cdpGroup, cdpDoc) => {
+          cdpTotal += cdpGroup.valor;
+          const linkedCrps = (crpDataCache || []).filter(crp => {
+            const depKey = dependencyJoinKey(getCdpDepFull(crp));
+            return depKey === group.depKey
+              && rubroJoinKey(crp.rubro) === group.rubroKey
+              && String(crp.cdp || '').trim() === cdpDoc;
+          });
+          const crpValor = linkedCrps.reduce((sum, row) => sum + (Number(row.valor_actual) || 0), 0);
+          const crpObligPagadas = sumCrpObligPagadas(linkedCrps);
+          const crpDocs = linkedCrps
+            .map(row => row.numero_documento !== null && row.numero_documento !== undefined ? String(row.numero_documento).trim() : '')
+            .filter(Boolean);
+          const porcentaje = getApropiacionObligPercent(group.ejeApropiacion, crpObligPagadas);
+          const semaforo = getSemaforoInfo(porcentaje);
+
+          rows.push({
+            key: `${group.key}|cdp:${cdpDoc}`,
+            groupKey: group.key,
+            dependenciaNumero: parts.numero || 'Sin número',
+            dependenciaCentro: centro,
+            dependenciaNombre: nombre,
+            dependenciaOriginal: group.depOriginal,
+            rubro: group.rubro,
+            conceptoSena: cdpGroup.objeto || '',
+            ejeApropiacion: group.ejeApropiacion,
+            crpObligPagadas,
+            cdpValorActual: cdpGroup.valor,
+            crpValorActual: crpValor,
+            cdpDoc,
+            crpCount: crpDocs.length,
+            crpDocs,
+            porcentaje,
+            semaforo,
+            isUncovered: false,
+          });
+        });
+
+        const uncovered = group.ejeApropiacion - cdpTotal;
+        if (uncovered > 0.005 || (cdpByDoc.size === 0 && group.ejeApropiacion > 0)) {
+          const saldoSinCdp = cdpByDoc.size === 0 ? group.ejeApropiacion : uncovered;
+          rows.push({
+            key: `${group.key}|uncovered`,
+            groupKey: group.key,
+            dependenciaNumero: parts.numero || 'Sin número',
+            dependenciaCentro: centro,
+            dependenciaNombre: nombre,
+            dependenciaOriginal: group.depOriginal,
+            rubro: group.rubro,
+            conceptoSena: 'Sin CDP / CRP',
+            ejeApropiacion: saldoSinCdp,
+            crpObligPagadas: 0,
+            cdpValorActual: 0,
+            crpValorActual: 0,
+            cdpDoc: '',
+            crpCount: 0,
+            crpDocs: [],
+            porcentaje: 0,
+            semaforo: getSemaforoInfo(0),
+            isUncovered: true,
+          });
+        }
+      });
+
+      return rows.sort((a, b) => {
+        const depCmp = (a.dependenciaNombre || '').localeCompare(b.dependenciaNombre || '', 'es');
+        if (depCmp !== 0) return depCmp;
+        const rubroCmp = (a.rubro || '').localeCompare(b.rubro || '', 'es');
+        if (rubroCmp !== 0) return rubroCmp;
+        if (a.isUncovered && !b.isUncovered) return 1;
+        if (!a.isUncovered && b.isUncovered) return -1;
+        return (a.cdpDoc || '').localeCompare(b.cdpDoc || '', 'es', { numeric: true });
+      });
+    }
+
+    function getExecutionPercent(cdpValor, crpValor) {
+      const cdp = Number(cdpValor) || 0;
+      const crp = Number(crpValor) || 0;
+      if (!cdp) return 0;
+      return crp / cdp;
+    }
+
+    function getApropiacionObligPercent(apropiacion, obligPagadas, isSynthetic = false) {
+      if (isSynthetic) return 0;
+
+      const aprop = Number(apropiacion) || 0;
+      const oblig = Number(obligPagadas) || 0;
+
+      if (!aprop) return 0;
+
+      return oblig / aprop;
+    }
+
+    function isSinCdpNiCrpRow(row, table) {
+      if (table === 'cruce') {
+        return row.isUncovered === true;
+      }
+      if (table === 'crp') {
+        return row.isSynthetic === true && String(row.syntheticNote || '').includes('Sin CDP / CRP');
+      }
+      return false;
+    }
+
+    function matchesCoberturaFilter(row, mode, table) {
+      if (!mode || mode === 'all') return true;
+      const sinCdpCrp = isSinCdpNiCrpRow(row, table);
+      if (mode === 'sin_cdp_crp') return sinCdpCrp;
+      if (mode === 'con_cdp_crp') return !sinCdpCrp;
+      return true;
+    }
+
     function getCentroNameByCodigo(codigo) {
       const primeros4 = (codigo || '').substring(0, 4);
       const option = CENTRO_FORMACION_OPTIONS.find(opt => opt.code === primeros4);
@@ -2125,6 +2479,7 @@
       const depNombreContainer = document.getElementById('cruce-filter-dependencia-nombre');
       const cdpContainer = document.getElementById('cruce-filter-cdp');
       const crpContainer = document.getElementById('cruce-filter-crp');
+      const coberturaSelect = document.getElementById('cruce-filter-cobertura');
       const searchInput = document.getElementById('cruce-search-input');
       const summaryEl = document.getElementById('cruce-table-summary');
       const exportBtn = document.getElementById('cruce-export-btn');
@@ -2137,96 +2492,14 @@
 
       if (!container || !depNumeroContainer || !depCentroContainer || !depNombreContainer || !cdpContainer || !crpContainer || !searchInput || !summaryEl || !exportBtn || !detailExportBtn || !bodyEl || !pageInfoEl || !pageCurrentEl || !pagePrevEl || !pageNextEl) return;
 
-      const crossMap = new Map();
       const selectedCrossKeys = new Set();
-
-      function getOrCreateCrossRow(depValue, codigoDepenciencia = null, nombreDependencia = null) {
-        const depKey = dependencyJoinKey(depValue);
-        if (!depKey) return null;
-
-        const key = depKey;
-        if (!crossMap.has(key)) {
-          const parts = parseDependencyParts(depValue);
-          const codigo = codigoDepenciencia || parts.numero || '';
-          const centroNombre = getCentroNameByCodigo(codigo);
-          const nombre = nombreDependencia !== null ? nombreDependencia : (parts.nombre || 'Sin dependencia');
-          
-          crossMap.set(key, {
-            key,
-            dependenciaNumero: parts.numero || 'Sin número',
-            dependenciaCentro: centroNombre,
-            dependenciaNombre: nombre,
-            dependenciaOriginal: depValue || 'Sin dependencia',
-            ejeApropiacion: 0,
-            cdpValorActual: 0,
-            crpValorActual: 0,
-            cdpDocs: new Set(),
-            crpDocs: new Set(),
-            cdpValores: new Map(),
-            crpValores: new Map(),
-          });
-        }
-        return crossMap.get(key);
-      }
-
-      const ejeRows = (ejeDataCache || []).filter(r => r.es_resumen === true || r.es_resumen === 1);
-      ejeRows.forEach(row => {
-        const dep = row.dependecia_de_afectacion_de_gastos || '';
-        const codigoMatch = dep.match(/^\s*(\d+)/);
-        const codigo = codigoMatch ? codigoMatch[1] : '';
-        const nombreMatch = dep.match(/^\s*\d+\s*[-\s]+(.*)$/);
-        const nombre = nombreMatch ? nombreMatch[1].trim() : dep;
-        const target = getOrCreateCrossRow(dep, codigo, nombre);
-        if (!target) return;
-        target.ejeApropiacion += Number(row.apropiacion_vigente_dep_gsto) || 0;
-      });
-
-      (cdpDataCache || []).forEach(row => {
-        const dep = (row.dependencia_descripcion || '').trim()
-          ? `${row.dependencia || ''} - ${row.dependencia_descripcion || ''}`
-          : (row.dependencia || '');
-        const target = getOrCreateCrossRow(dep, row.dependencia, row.dependencia_descripcion);
-        if (!target) return;
-        target.cdpValorActual += Number(row.valor_actual) || 0;
-        if (row.numero_documento !== null && row.numero_documento !== undefined && String(row.numero_documento).trim() !== '') {
-          const cdpDoc = String(row.numero_documento).trim();
-          target.cdpDocs.add(cdpDoc);
-          const acumulado = target.cdpValores.get(cdpDoc) || 0;
-          target.cdpValores.set(cdpDoc, acumulado + (Number(row.valor_actual) || 0));
-        }
-      });
-
-      (crpDataCache || []).forEach(row => {
-        const dep = (row.dependencia_descripcion || '').trim()
-          ? `${row.dependencia || ''} - ${row.dependencia_descripcion || ''}`
-          : (row.dependencia || '');
-        const target = getOrCreateCrossRow(dep, row.dependencia, row.dependencia_descripcion);
-        if (!target) return;
-        target.crpValorActual += Number(row.valor_actual) || 0;
-        if (row.numero_documento !== null && row.numero_documento !== undefined && String(row.numero_documento).trim() !== '') {
-          const crpDoc = String(row.numero_documento).trim();
-          target.crpDocs.add(crpDoc);
-          const acumulado = target.crpValores.get(crpDoc) || 0;
-          target.crpValores.set(crpDoc, acumulado + (Number(row.valor_actual) || 0));
-        }
-      });
-
-      const baseRows = Array.from(crossMap.values()).filter(row => {
-        return row.ejeApropiacion !== 0 || row.cdpValorActual !== 0 || row.crpValorActual !== 0 || row.cdpDocs.size > 0 || row.crpDocs.size > 0;
-      });
+      const baseRows = buildCruceBaseRows();
 
       cruceDataCache = baseRows;
       cruceFilteredDataCache = baseRows.slice();
 
       let filteredRows = baseRows.slice();
       let searchTerm = (searchInput.value || '').toString().trim().toLowerCase();
-
-      function getExecutionPercent(cdpValor, crpValor) {
-        const cdp = Number(cdpValor) || 0;
-        const crp = Number(crpValor) || 0;
-        if (!cdp) return 0;
-        return crp / cdp;
-      }
 
       function getDetailRowsForSelectedOrFiltered() {
         const sourceRows = selectedCrossKeys.size
@@ -2235,99 +2508,39 @@
 
         const detailRows = [];
         sourceRows.forEach(row => {
-          const depKey = row.key;
-          const depNumero = row.dependenciaNumero || '';
-          const depCentro = row.dependenciaCentro || '';
-          const depNombre = row.dependenciaNombre || '';
-          const depOriginal = row.dependenciaOriginal || '';
+          const baseDetail = {
+            dependenciaNumero: row.dependenciaNumero || '',
+            dependenciaCentro: row.dependenciaCentro || '',
+            dependenciaNombre: row.dependenciaNombre || '',
+            rubro: row.rubro || '',
+            cdpDocumento: row.cdpDoc || 'Sin CDP',
+            cdpObjeto: row.conceptoSena || '',
+            ejeObligPagadas: row.crpObligPagadas || 0,
+            cdpValor: row.cdpValorActual || 0,
+            totalCrp: row.crpValorActual || 0,
+            porcentaje: row.porcentaje || 0,
+            saldo: (Number(row.cdpValorActual) || 0) - (Number(row.crpValorActual) || 0),
+            semaforo: row.semaforo ? row.semaforo.label : '',
+          };
 
-          const cdpGroups = new Map();
-          (cdpDataCache || []).forEach(cdpRow => {
-            const dep = (cdpRow.dependencia_descripcion || '').trim()
-              ? `${cdpRow.dependencia || ''} - ${cdpRow.dependencia_descripcion || ''}`
-              : (cdpRow.dependencia || '');
-            if (dependencyJoinKey(dep) !== depKey) return;
-            const cdpDoc = cdpRow.numero_documento !== null && cdpRow.numero_documento !== undefined
-              ? String(cdpRow.numero_documento).trim()
-              : '';
-            if (!cdpDoc) return;
-            if (!cdpGroups.has(cdpDoc)) {
-              cdpGroups.set(cdpDoc, { valor: 0, rows: [] });
-            }
-            const group = cdpGroups.get(cdpDoc);
-            group.valor += Number(cdpRow.valor_actual) || 0;
-            group.rows.push(cdpRow);
-          });
+          if (!row.crpDocs || !row.crpDocs.length) {
+            detailRows.push({ ...baseDetail, crpDocumento: '', crpValor: 0 });
+            return;
+          }
 
-          const crpGroupsByCdp = new Map();
-          (crpDataCache || []).forEach(crpRow => {
-            const dep = (crpRow.dependencia_descripcion || '').trim()
-              ? `${crpRow.dependencia || ''} - ${crpRow.dependencia_descripcion || ''}`
-              : (crpRow.dependencia || '');
-            if (dependencyJoinKey(dep) !== depKey) return;
-            const cdpDoc = crpRow.cdp !== null && crpRow.cdp !== undefined
-              ? String(crpRow.cdp).trim()
-              : '';
-            if (!cdpDoc) return;
-            if (!crpGroupsByCdp.has(cdpDoc)) {
-              crpGroupsByCdp.set(cdpDoc, new Map());
-            }
-            const crpDoc = crpRow.numero_documento !== null && crpRow.numero_documento !== undefined
-              ? String(crpRow.numero_documento).trim()
-              : '';
-            const docKey = crpDoc || 'sin_crp';
-            const group = crpGroupsByCdp.get(cdpDoc);
-            group.set(docKey, (group.get(docKey) || 0) + (Number(crpRow.valor_actual) || 0));
-          });
-
-          Array.from(cdpGroups.entries())
-            .sort((a, b) => a[0].localeCompare(b[0], 'es', { numeric: true }))
-            .forEach(([cdpDoc, cdpGroup]) => {
-              const crpMap = crpGroupsByCdp.get(cdpDoc) || new Map();
-              const totalCrp = Array.from(crpMap.values()).reduce((acc, value) => acc + (Number(value) || 0), 0);
-              const porcentaje = getExecutionPercent(cdpGroup.valor, totalCrp);
-              const semaforo = getSemaforoInfo(porcentaje);
-              const saldo = (Number(cdpGroup.valor) || 0) - totalCrp;
-              const crpEntries = Array.from(crpMap.entries()).sort((a, b) => a[0].localeCompare(b[0], 'es', { numeric: true }));
-              if (!crpEntries.length) {
-                detailRows.push({
-                  depKey,
-                  dependenciaNumero: depNumero,
-                  dependenciaCentro: depCentro,
-                  dependenciaNombre: depNombre,
-                  dependenciaOriginal: depOriginal,
-                  cdpDocumento: cdpDoc,
-                  cdpValor: cdpGroup.valor,
-                  totalCrp,
-                  porcentaje,
-                  saldo,
-                  semaforo: semaforo.label,
-                  semaforoClass: semaforo.className,
-                  crpDocumento: '',
-                  crpValor: 0,
-                });
-                return;
-              }
-
-              crpEntries.forEach(([crpDoc, crpValor]) => {
-                detailRows.push({
-                  depKey,
-                  dependenciaNumero: depNumero,
-                  dependenciaCentro: depCentro,
-                  dependenciaNombre: depNombre,
-                  dependenciaOriginal: depOriginal,
-                  cdpDocumento: cdpDoc,
-                  cdpValor: cdpGroup.valor,
-                  totalCrp,
-                  porcentaje,
-                  saldo,
-                  semaforo: semaforo.label,
-                  semaforoClass: semaforo.className,
-                  crpDocumento: crpDoc,
-                  crpValor,
-                });
-              });
+          row.crpDocs.forEach(crpDoc => {
+            const crpRow = (crpDataCache || []).find(crp =>
+              String(crp.numero_documento || '').trim() === crpDoc
+              && String(crp.cdp || '').trim() === String(row.cdpDoc || '').trim()
+              && dependencyJoinKey(getCdpDepFull(crp)) === dependencyJoinKey(row.dependenciaOriginal)
+              && rubroJoinKey(crp.rubro) === rubroJoinKey(row.rubro)
+            );
+            detailRows.push({
+              ...baseDetail,
+              crpDocumento: crpDoc,
+              crpValor: crpRow ? (Number(crpRow.valor_actual) || 0) : 0,
             });
+          });
         });
 
         return detailRows;
@@ -2352,11 +2565,10 @@
         if (excludeKey !== 'depCentro' && selections.depCentros.length && !selections.depCentros.includes(row.dependenciaCentro)) return false;
         if (excludeKey !== 'depNombre' && selections.depNombres.length && !selections.depNombres.includes(row.dependenciaNombre)) return false;
         if (excludeKey !== 'cdp' && selections.cdps.length) {
-          const has = Array.from(row.cdpDocs).some(v => selections.cdps.includes(v));
-          if (!has) return false;
+          if (!row.cdpDoc || !selections.cdps.includes(row.cdpDoc)) return false;
         }
         if (excludeKey !== 'crp' && selections.crps.length) {
-          const has = Array.from(row.crpDocs).some(v => selections.crps.includes(v));
+          const has = (row.crpDocs || []).some(v => selections.crps.includes(v));
           if (!has) return false;
         }
         return true;
@@ -2390,14 +2602,15 @@
         const cdpOptions = uniqueSorted(
           baseRows
             .filter(r => rowMatchesSelections(r, current, 'cdp'))
-            .flatMap(r => Array.from(r.cdpDocs)),
+            .map(r => r.cdpDoc)
+            .filter(Boolean),
           true
         );
 
         const crpOptions = uniqueSorted(
           baseRows
             .filter(r => rowMatchesSelections(r, current, 'crp'))
-            .flatMap(r => Array.from(r.crpDocs)),
+            .flatMap(r => r.crpDocs || []),
           true
         );
 
@@ -2430,12 +2643,16 @@
         const pageRows = filteredRows.slice(startIdx, endIdx);
 
         pageRows.forEach(row => {
-          const cdpDocs = Array.from(row.cdpDocs);
-          const crpDocs = Array.from(row.crpDocs);
-          const porcentaje = getExecutionPercent(row.cdpValorActual, row.crpValorActual);
-          const semaforo = getSemaforoInfo(porcentaje);
+          const porcentaje = row.isUncovered
+            ? 0
+            : (row.porcentaje != null
+              ? row.porcentaje
+              : getApropiacionObligPercent(row.ejeApropiacion, row.crpObligPagadas));
+          const semaforo = row.isUncovered ? getSemaforoInfo(0) : (row.semaforo || getSemaforoInfo(porcentaje));
+          const semaforoClass = (semaforo.className || 'status-red').replace('status-', 'cruce-row-');
+          const ejeApropiacionLabel = `$ ${formatMoney(row.ejeApropiacion)}`;
           const div = document.createElement('div');
-          div.className = `data-table-row data-table-row-cruce${selectedCrossKeys.has(row.key) ? ' is-selected' : ''}`;
+          div.className = `data-table-row data-table-row-cruce ${semaforoClass}${row.isUncovered ? ' is-uncovered' : ''}${selectedCrossKeys.has(row.key) ? ' is-selected' : ''}`;
           div.title = 'Haz clic para seleccionar o deseleccionar este cruce';
           div.addEventListener('click', () => {
             if (selectedCrossKeys.has(row.key)) {
@@ -2449,14 +2666,15 @@
             <span title="${row.dependenciaNumero}">${row.dependenciaNumero}</span>
             <span title="${row.dependenciaCentro}">${row.dependenciaCentro}</span>
             <span title="${row.dependenciaNombre}">${row.dependenciaNombre}</span>
-            <span>$ ${formatMoney(row.ejeApropiacion)}</span>
+            <span title="${row.rubro || ''}">${(row.rubro || '').slice(0, 22)}${(row.rubro || '').length > 22 ? '…' : ''}</span>
+            <span title="${ejeApropiacionLabel}">${ejeApropiacionLabel}</span>
+            <span title="${row.conceptoSena || ''}">${(row.conceptoSena || '').slice(0, 32)}${(row.conceptoSena || '').length > 32 ? '…' : ''}</span>
             <span>$ ${formatMoney(row.cdpValorActual)}</span>
             <span>$ ${formatMoney(row.crpValorActual)}</span>
-            <span title="${cdpDocs.join(', ')}">${cdpDocs.length}</span>
-            <span title="${crpDocs.join(', ')}">${crpDocs.length}</span>
-            <span>
-              <span class="status-badge ${semaforo.className}" title="${formatPercentValue(porcentaje)} ejecutado">${formatPercentValue(porcentaje)} ${semaforo.label}</span>
-            </span>
+            <span>$ ${formatMoney(row.crpObligPagadas)}</span>
+            <span title="${row.cdpDoc || 'Sin CDP'}">${row.cdpDoc || '—'}</span>
+            <span title="${(row.crpDocs || []).join(', ')}">${row.crpCount || 0}</span>
+            <span class="cruce-pct" title="Apropiación / oblig. pagadas">${formatPercentValue(porcentaje)}</span>
           `;
           bodyEl.appendChild(div);
         });
@@ -2491,22 +2709,25 @@
           if (selNombres.size && !selNombres.has(row.dependenciaNombre)) return false;
 
           if (selCdps.size) {
-            const hasCdp = Array.from(row.cdpDocs).some(v => selCdps.has(v));
-            if (!hasCdp) return false;
+            if (!row.cdpDoc || !selCdps.has(row.cdpDoc)) return false;
           }
 
           if (selCrps.size) {
-            const hasCrp = Array.from(row.crpDocs).some(v => selCrps.has(v));
+            const hasCrp = (row.crpDocs || []).some(v => selCrps.has(v));
             if (!hasCrp) return false;
           }
+
+          if (!matchesCoberturaFilter(row, coberturaSelect ? coberturaSelect.value : 'all', 'cruce')) return false;
 
           if (searchTerm) {
             const haystack = [
               row.dependenciaNumero,
               row.dependenciaCentro,
               row.dependenciaNombre,
-              ...Array.from(row.cdpDocs),
-              ...Array.from(row.crpDocs),
+              row.rubro,
+              row.conceptoSena,
+              row.cdpDoc,
+              ...(row.crpDocs || []),
             ]
               .map(v => (v || '').toString().toLowerCase())
               .join(' ');
@@ -2518,78 +2739,71 @@
 
         cruceFilteredDataCache = filteredRows.slice();
         cruceCurrentPage = 1;
-        const totalEje = filteredRows.reduce((acc, row) => acc + (Number(row.ejeApropiacion) || 0), 0);
+        let totalEje = 0;
+        const groupsHandled = new Set();
+        filteredRows.forEach(row => {
+          const gk = row.groupKey || row.key;
+          if (groupsHandled.has(gk)) return;
+          const groupRows = filteredRows.filter(r => (r.groupKey || r.key) === gk);
+          const uncoveredRow = groupRows.find(r => r.isUncovered);
+          if (uncoveredRow) {
+            const cdpSum = groupRows
+              .filter(r => !r.isUncovered)
+              .reduce((sum, r) => sum + (Number(r.cdpValorActual) || 0), 0);
+            totalEje += cdpSum + (Number(uncoveredRow.ejeApropiacion) || 0);
+          } else {
+            totalEje += Number(groupRows[0].ejeApropiacion) || 0;
+          }
+          groupsHandled.add(gk);
+        });
+        const totalObligPagadas = filteredRows.reduce((acc, row) => acc + (Number(row.crpObligPagadas) || 0), 0);
         const totalCdp = filteredRows.reduce((acc, row) => acc + (Number(row.cdpValorActual) || 0), 0);
         const totalCrp = filteredRows.reduce((acc, row) => acc + (Number(row.crpValorActual) || 0), 0);
-        summaryEl.textContent = `Cruces: ${filteredRows.length}. Seleccionados: ${selectedCrossKeys.size}. EJE aprop. vigente: $ ${formatMoney(totalEje)}. Apropiación valor actual: $ ${formatMoney(totalCdp)}. Ejecución valor actual: $ ${formatMoney(totalCrp)}.`;
+        summaryEl.textContent = `Cruces: ${filteredRows.length}. Seleccionados: ${selectedCrossKeys.size}. EJE aprop. vigente: $ ${formatMoney(totalEje)}. Apropiación: $ ${formatMoney(totalCdp)}. Ejecución: $ ${formatMoney(totalCrp)}. Obligaciones pagadas: $ ${formatMoney(totalObligPagadas)}.`;
         renderCruceRows();
       }
 
       exportBtn.onclick = () => {
-        const formatDocValues = (valuesMap) => {
-          const items = Array.from(valuesMap.entries())
-            .sort((a, b) => a[0].localeCompare(b[0], 'es', { numeric: true }))
-            .map(([doc, value]) => `${doc}: $ ${formatMoney(value)}`);
-          return items.join(' | ');
-        };
-
-        const formatCdpToCrp = (row) => {
-          const mapping = [];
-          const allCrps = Array.isArray(crpDataCache) ? crpDataCache : [];
-          const rowKey = row.key;
-          Array.from(row.cdpDocs || []).sort((a,b)=>a.localeCompare(b,'es',{numeric:true})).forEach(cdp => {
-            const linked = allCrps
-              .filter(r => {
-                const dep = (r.dependencia_descripcion || '').trim()
-                  ? `${r.dependencia || ''} - ${r.dependencia_descripcion || ''}`
-                  : (r.dependencia || '');
-                const key = dependencyJoinKey(dep);
-                return String(r.cdp || '').trim() === String(cdp).trim() && key === rowKey;
-              })
-              .map(r => (r.numero_documento || '').toString().trim())
-              .filter(Boolean);
-            mapping.push(`CDP ${cdp}: ${linked.length ? linked.join(', ') : 'sin CRP'}`);
-          });
-          return mapping.join(' | ');
-        };
-
         const sourceRows = cruceFilteredDataCache || [];
-        const totalGeneralCdp = sourceRows.reduce((acc, row) => acc + (Number(row.cdpValorActual) || 0), 0);
-        const totalGeneralCrp = sourceRows.reduce((acc, row) => acc + (Number(row.crpValorActual) || 0), 0);
-
-        const rowsForExport = sourceRows.map(row => ({
-          ...row,
-        }));
+        const rowsForExport = sourceRows.map(row => ({ ...row }));
 
         rowsForExport.push({
           dependenciaNumero: 'TOTAL GENERAL',
           dependenciaCentro: '',
           dependenciaNombre: '',
-          dependenciaOriginal: 'TOTAL GENERAL',
-          ejeApropiacion: sourceRows.reduce((acc, row) => acc + (Number(row.ejeApropiacion) || 0), 0),
-          cdpValorActual: totalGeneralCdp,
-          crpValorActual: totalGeneralCrp,
-          cdpDocs: new Set(),
-          crpDocs: new Set(),
-          cdpValores: new Map(),
-          crpValores: new Map(),
+          rubro: '',
+          conceptoSena: '',
+          ejeApropiacion: (() => {
+            const seen = new Set();
+            return sourceRows.reduce((acc, row) => {
+              const gk = row.groupKey || row.key;
+              if (seen.has(gk)) return acc;
+              seen.add(gk);
+              return acc + (Number(row.ejeApropiacion) || 0);
+            }, 0);
+          })(),
+          cdpValorActual: sourceRows.reduce((acc, row) => acc + (Number(row.cdpValorActual) || 0), 0),
+          crpValorActual: sourceRows.reduce((acc, row) => acc + (Number(row.crpValorActual) || 0), 0),
+          crpObligPagadas: sourceRows.reduce((acc, row) => acc + (Number(row.crpObligPagadas) || 0), 0),
+          cdpDoc: '',
+          crpCount: sourceRows.reduce((acc, row) => acc + (Number(row.crpCount) || 0), 0),
+          porcentaje: 0,
         });
 
         const columns = [
           { key: 'dependenciaNumero', header: 'Dep. número' },
           { key: 'dependenciaCentro', header: 'Centro' },
           { key: 'dependenciaNombre', header: 'Dependencia' },
+          { key: 'rubro', header: 'Rubro' },
           { key: 'ejeApropiacion', header: 'Aprop. vigente EJE' },
+          { key: 'conceptoSena', header: 'Concepto SENA' },
           { key: 'cdpValorActual', header: 'Valor actual Apropiación' },
           { key: 'crpValorActual', header: 'Valor actual Ejecución' },
-          { key: 'diferenciaCdpVsCrpFormula', header: 'Diferencia CDP - CRP (fórmula)', getter: (_row, excelRow) => ({ formula: `E${excelRow}-F${excelRow}` }) },
-          { key: 'cdpCount', header: 'Cantidad CDP', getter: row => row.cdpDocs.size },
-          { key: 'crpCount', header: 'Cantidad CRP', getter: row => row.crpDocs.size },
-          { key: 'cdpList', header: 'CDP (todos)', getter: row => Array.from(row.cdpDocs).sort((a, b) => a.localeCompare(b, 'es', { numeric: true })).join(', ') },
-          { key: 'cdpValores', header: 'CDP y valor actual', getter: row => formatDocValues(row.cdpValores) },
-          { key: 'crpList', header: 'CRP (todos)', getter: row => Array.from(row.crpDocs).sort((a, b) => a.localeCompare(b, 'es', { numeric: true })).join(', ') },
-          { key: 'crpValores', header: 'CRP y valor actual', getter: row => formatDocValues(row.crpValores) },
-          { key: 'cdpCrpMap', header: 'CDP -> CRP(s)', getter: row => formatCdpToCrp(row) },
+          { key: 'crpObligPagadas', header: 'Obligaciones pagadas' },
+          { key: 'cdpDoc', header: 'CDP' },
+          { key: 'crpCount', header: 'N° de crp' },
+          { key: 'crpDocs', header: 'CRP (lista)', getter: row => (row.crpDocs || []).join(', ') },
+          { key: 'porcentaje', header: '% (aprop. / oblig. pagadas)', getter: row => row.porcentaje },
         ];
 
         exportRowsToExcel({
@@ -2597,8 +2811,8 @@
           columns,
           filename: 'cruce_filtrado.xlsx',
           sheetName: 'Cruce',
-          numericKeys: ['ejeApropiacion', 'cdpValorActual', 'crpValorActual', 'diferenciaCdpVsCrpFormula'],
-          colWidths: [14, 28, 36, 20, 22, 22, 24, 14, 14, 34, 45, 34, 45, 48],
+          numericKeys: ['ejeApropiacion', 'cdpValorActual', 'crpValorActual', 'crpObligPagadas', 'crpCount', 'porcentaje'],
+          colWidths: [14, 28, 36, 18, 20, 36, 22, 22, 22, 14, 14, 34, 14],
         });
       };
 
@@ -2613,13 +2827,16 @@
           { key: 'dependenciaNumero', header: 'Dep. número' },
           { key: 'dependenciaCentro', header: 'Centro' },
           { key: 'dependenciaNombre', header: 'Dependencia' },
+          { key: 'rubro', header: 'Rubro' },
           { key: 'cdpDocumento', header: 'CDP' },
+          { key: 'cdpObjeto', header: 'Concepto SENA' },
+          { key: 'ejeObligPagadas', header: 'Obligaciones pagadas' },
           { key: 'cdpValor', header: 'Valor CDP' },
           { key: 'totalCrp', header: 'Total CRP del CDP' },
-          { key: 'porcentaje', header: '% ejecutado', getter: row => formatPercentValue(row.porcentaje) },
+          { key: 'porcentaje', header: '% (aprop. / oblig. pagadas)', getter: row => row.porcentaje },
           { key: 'saldo', header: 'Saldo por ejecutar' },
           { key: 'semaforo', header: 'Semáforo' },
-          { key: 'crpDocumento', header: 'CRP' },
+          { key: 'crpDocumento', header: 'N° de crp' },
           { key: 'crpValor', header: 'Valor CRP' },
         ];
 
@@ -2628,8 +2845,8 @@
           columns,
           filename: 'cruce_detallado.xlsx',
           sheetName: 'Detalle',
-          numericKeys: ['cdpValor', 'totalCrp', 'porcentaje', 'saldo', 'crpValor'],
-          colWidths: [14, 28, 36, 16, 18, 20, 14, 18, 14, 16, 16],
+          numericKeys: ['ejeObligPagadas', 'cdpValor', 'totalCrp', 'porcentaje', 'saldo', 'crpValor'],
+          colWidths: [14, 28, 36, 18, 16, 36, 20, 18, 20, 14, 18, 14, 16, 16],
         });
       };
 
@@ -2637,6 +2854,10 @@
         searchTerm = (e.target.value || '').toString().trim().toLowerCase();
         applyCruceFilters();
       };
+
+      if (coberturaSelect) {
+        coberturaSelect.onchange = applyCruceFilters;
+      }
 
       pagePrevEl.onclick = () => {
         if (cruceCurrentPage > 1) {
@@ -2659,21 +2880,31 @@
     function setupNav() {
       const btnDashboard = document.getElementById('nav-dashboard');
       const btnUpload = document.getElementById('nav-upload');
+      const btnSeguimientoMetas = document.getElementById('nav-seguimiento-metas');
       const viewDashboard = document.getElementById('view-dashboard');
       const viewUpload = document.getElementById('view-upload');
+      const viewSeguimientoMetas = document.getElementById('view-seguimiento-metas');
+
+      function setActiveView(viewName) {
+        btnDashboard.classList.toggle('active', viewName === 'dashboard');
+        btnUpload.classList.toggle('active', viewName === 'upload');
+        btnSeguimientoMetas.classList.toggle('active', viewName === 'seguimiento-metas');
+
+        viewDashboard.style.display = viewName === 'dashboard' ? '' : 'none';
+        viewUpload.style.display = viewName === 'upload' ? '' : 'none';
+        viewSeguimientoMetas.style.display = viewName === 'seguimiento-metas' ? '' : 'none';
+      }
 
       btnDashboard.addEventListener('click', () => {
-        btnDashboard.classList.add('active');
-        btnUpload.classList.remove('active');
-        viewDashboard.style.display = '';
-        viewUpload.style.display = 'none';
+        setActiveView('dashboard');
       });
 
       btnUpload.addEventListener('click', () => {
-        btnUpload.classList.add('active');
-        btnDashboard.classList.remove('active');
-        viewDashboard.style.display = 'none';
-        viewUpload.style.display = '';
+        setActiveView('upload');
+      });
+
+      btnSeguimientoMetas.addEventListener('click', () => {
+        setActiveView('seguimiento-metas');
       });
     }
 
@@ -2788,6 +3019,18 @@
         if (numericKeys.includes(col.key)) numericColIndexes.push(idx + 1);
       });
 
+      function getNumericFormat(column) {
+        const key = (column && column.key) ? String(column.key).toLowerCase() : '';
+        const header = (column && column.header) ? String(column.header).toLowerCase() : '';
+        if (key.includes('percent') || key.includes('porcentaje') || header.includes('%')) {
+          return '0.0%';
+        }
+        if (key.includes('count') || header.includes('cantidad')) {
+          return '#,##0';
+        }
+        return '_-* #,##0.00_-;\-* (#,##0.00)\-;_-* "-"??_-;_-@_-';
+      }
+
       rows.forEach((row, idx) => {
         const excelRowNumber = idx + 2;
         const values = columns.map(c => {
@@ -2810,7 +3053,8 @@
         numericColIndexes.forEach(colIndex => {
           const cell = excelRow.getCell(colIndex);
           if (cell.value !== null && cell.value !== undefined && cell.value !== '') {
-            cell.numFmt = '#,##0.00';
+            cell.numFmt = getNumericFormat(columns[colIndex - 1]);
+            cell.alignment = { vertical: 'top', horizontal: 'right', wrapText: true };
           }
         });
       });
@@ -3097,6 +3341,10 @@
         },
       });
     }
+    console.log("GRUPO:", group);
+    console.log("CDP:", group.tieneCDP);
+    console.log("CRPS:", linkedCrps);
+    console.log("CRP LENGTH:", linkedCrps?.length);
   </script>
 </body>
 </html>
